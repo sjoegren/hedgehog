@@ -1,4 +1,3 @@
-# From https://docs.python.org/3/library/difflib.html?highlight=readlines#a-command-line-interface-to-difflib
 """ Command line interface to difflib.py providing diffs in four formats:
 
 * ndiff:    lists every line and highlights interline changes.
@@ -15,6 +14,8 @@ import sys
 
 from datetime import datetime, timezone
 
+from . import colordiff
+
 
 def file_mtime(path):
     t = datetime.fromtimestamp(os.stat(path).st_mtime, timezone.utc)
@@ -26,19 +27,28 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-c",
+        "--context",
         action="store_true",
         help="Produce a context format diff (default)",
     )
     parser.add_argument(
-        "-u", action="store_true", help="Produce a unified format diff"
+        "-u", "--unified", action="store_true", help="Produce a unified format diff"
     )
     parser.add_argument(
-        "-m", "--html",
+        "-m",
+        "--html",
         action="store_true",
         help="Produce HTML side by side diff " "(can use -c and -l in conjunction)",
     )
     parser.add_argument(
-        "-n", action="store_true", help="Produce a ndiff format diff"
+        "-n", "--ndiff", action="store_true", help="Produce a ndiff format diff"
+    )
+    parser.add_argument(
+        "--no-color",
+        "-C",
+        action="store_false",
+        dest="color",
+        help="Disable color output for --ndiff format",
     )
     parser.add_argument(
         "-l",
@@ -62,20 +72,21 @@ def main():
     with open(tofile) as tf:
         tolines = tf.readlines()
 
-    if options.u:
+    if options.unified:
         diff = difflib.unified_diff(
             fromlines, tolines, fromfile, tofile, fromdate, todate, n=n
         )
-    elif options.n:
-        diff = difflib.ndiff(fromlines, tolines)
-    elif options.m:
+    elif options.context:
+        diff = difflib.context_diff(
+            fromlines, tolines, fromfile, tofile, fromdate, todate, n=n
+        )
+    elif options.html:
         diff = difflib.HtmlDiff().make_file(
             fromlines, tolines, fromfile, tofile, context=options.c, numlines=n
         )
     else:
-        diff = difflib.context_diff(
-            fromlines, tolines, fromfile, tofile, fromdate, todate, n=n
-        )
+        diff_gen = difflib.ndiff(fromlines, tolines)
+        diff = colordiff.color_diff_lines(diff_gen) if options.color else diff_gen
 
     sys.stdout.writelines(diff)
 
