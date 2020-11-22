@@ -27,7 +27,7 @@ def colorize_line(line, guide):
     out = []
     last_end = 0
     for m in pattern.finditer(guide, 2):
-        out.append(line[last_end: m.start()])  # copy characters before match
+        out.append(line[last_end : m.start()])  # copy characters before match
         chars = line[m.start() : m.end()]
         last_end = m.end()
         out.append(colored(chars, **_get_color(m)))
@@ -37,7 +37,7 @@ def colorize_line(line, guide):
 
 def _get_color(match):
     char = match[0][0]
-    if char == '^':
+    if char == "^":
         return {"on_color": "on_yellow"}
     elif char == "+":
         return {"on_color": "on_green"}
