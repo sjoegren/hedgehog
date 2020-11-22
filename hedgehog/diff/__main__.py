@@ -1,4 +1,4 @@
-""" Command line interface to difflib.py providing diffs in four formats:
+"""Command line interface to difflib.py providing diffs in four formats:
 
 * ndiff:    lists every line and highlights interline changes.
 * context:  highlights clusters of changes in a before/after format.
@@ -7,13 +7,13 @@
 
 """
 
-import argparse
 import difflib
 import os
 import sys
 
 from datetime import datetime, timezone
 
+from .. import argument_parser
 from . import colordiff
 
 
@@ -23,8 +23,7 @@ def file_mtime(path):
 
 
 def main():
-
-    parser = argparse.ArgumentParser()
+    parser = argument_parser(description=__doc__)
     parser.add_argument(
         "-c",
         "--context",
