@@ -82,7 +82,7 @@ case $exit_code in
 		test -x "$python"
 esac
 
-info "Using $(command -v $python)"
+info "Using $(command -v $python): $(command $python -V)"
 info "Installing into $INSTALL_DIR"
 if [ -e "$INSTALL_DIR" ]; then
 	info "$INSTALL_DIR already exists, attempting to upgrade."
