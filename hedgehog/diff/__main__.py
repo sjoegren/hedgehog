@@ -13,7 +13,7 @@ import sys
 
 from datetime import datetime, timezone
 
-from .. import argument_parser
+from .. import init_args
 from . import colordiff
 
 
@@ -23,7 +23,7 @@ def file_mtime(path):
 
 
 def main():
-    parser = argument_parser(description=__doc__)
+    parser = init_args(description=__doc__)
     parser.add_argument(
         "-c",
         "--context",
