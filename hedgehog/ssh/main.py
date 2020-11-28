@@ -22,7 +22,9 @@ import sys
 import os
 
 from . import ansible
-from .. import init_args, init_wrap, Error
+from .. import init_args, init_wrap, Error, Print
+
+cprint = None
 
 
 def init(*parse_args):
@@ -48,9 +50,12 @@ def init(*parse_args):
     parser.add_argument(
         "-l", "--last", action="store_true", help="ssh to last target used"
     )
+    parser.add_argument("--dryrun", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(*parse_args)
     if not (args.complete_hosts or args.last) and not args.sshargs:
         parser.error("hostname argument or --last is required")
+    global cprint
+    cprint = Print.instance(args.color)
     return args
 
 
@@ -86,9 +91,10 @@ def main(*, cli_args: str = None):
 
     command = "scp" if args.scp else "ssh-copy-id" if args.copy_id else "ssh"
     exec_args = (command, "-o", f"Hostname={host.address}", *args.sshargs)
-    print(f"exec: {' '.join(exec_args)}")
+    cprint(f"exec: {' '.join(exec_args)}", "yellow")
     sys.stdout.flush()
-    os.execlp(command, *exec_args)
+    if not args.dryrun:
+        os.execlp(command, *exec_args)
 
 
 def main_wrap():
@@ -96,5 +102,5 @@ def main_wrap():
     try:
         main()
     except Error as exc:
-        print(f"Error: {exc}")
+        Print.instance()(f"Error: {exc}", color="red")
         sys.exit(exc.retcode)

@@ -43,13 +43,6 @@ def main():
         "-n", "--ndiff", action="store_true", help="Produce a ndiff format diff"
     )
     parser.add_argument(
-        "--no-color",
-        "-C",
-        action="store_false",
-        dest="color",
-        help="Disable color output for --ndiff format",
-    )
-    parser.add_argument(
         "-l",
         "--lines",
         type=int,
