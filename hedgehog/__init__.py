@@ -57,6 +57,15 @@ class Print:
 
 
 class Logger(logging.getLoggerClass()):
+
+    _level_colors = {
+        "CRITICAL": "red",
+        "ERROR": "red",
+        "WARNING": "yellow",
+        "INFO": "blue",
+        "DEBUG": "green",
+    }
+
     def __init__(self, name):
         super().__init__(name)
 
@@ -64,10 +73,17 @@ class Logger(logging.getLoggerClass()):
         if getattr(self.root, "_hedgehog_debug", False) or level > logging.DEBUG:
             data = json.dumps(obj, indent=4)
             if getattr(self.root, "_color", False):
-                data = termcolor.colored(data, "red")
-            self.log(
-                level, msg + ". data:\n%s", *args, data, **kwargs
-            )
+                data = termcolor.colored(data, "green")
+            self.log(level, msg + ". data:\n%s", *args, data, **kwargs)
+
+    # color each levelname in different colors
+    # def makeRecord(self, *args, **kwargs):
+    #     rv = super().makeRecord(*args, **kwargs)
+    #     if getattr(self.root, "_color", False):
+    #         rv.levelname = termcolor.colored(
+    #             rv.levelname, self._level_colors[rv.levelname]
+    #         )
+    #     return rv
 
 
 def _argument_parser(logger: bool, argp_kwargs: dict):
