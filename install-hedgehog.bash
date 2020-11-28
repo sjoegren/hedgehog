@@ -5,12 +5,14 @@ set -uo pipefail
 
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/hedgehog}"
 PACKAGE="git+https://github.com/akselsjogren/hedgehog#egg=hedgehog"
+#PACKAGE="git+https://github.com/akselsjogren/hedgehog.git@devel#egg=hedgehog"
 MIN_VERSION_MAJOR=3
 MIN_VERSION_MINOR=8
 STATUS_PYTHON_OK=0
 STATUS_PYTHON_NOK=3
 STATUS_PYTHON_PYENV=4
 ENV_PYTHON="$INSTALL_DIR/bin/python"
+BASH_LINK_DIR="${BASH_LINK_DIR:-}"
 
 if [ -n "${HHDEBUG:-}" ]; then
 	set -x
@@ -103,6 +105,15 @@ fi
 info "Install $PACKAGE"
 $ENV_PYTHON -m pip --isolated -q install --use-pep517 --upgrade "$PACKAGE"
 $xtrace_level
+
+if [ -n "$BASH_LINK_DIR" ]; then
+    bash_dir=$INSTALL_DIR/lib/python*/site-packages/bash
+    test -d $bash_dir
+    for file in $bash_dir/*; do
+        info "Installing $file"
+        ln -v -f -s $file $BASH_LINK_DIR/
+    done
+fi
 
 version=$($ENV_PYTHON -m hedgehog)
 info "Successfully installed version $version"
