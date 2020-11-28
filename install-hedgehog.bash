@@ -12,27 +12,18 @@ STATUS_PYTHON_OK=0
 STATUS_PYTHON_NOK=3
 STATUS_PYTHON_PYENV=4
 ENV_PYTHON="$INSTALL_DIR/bin/python"
-BASH_LINK_DIR="${BASH_LINK_DIR:-}"
+BASH_DIR="${BASH_DIR:-}"
 
-if [ -n "${HHDEBUG:-}" ]; then
-	set -x
-fi
-
-xtrace_level=$(shopt -op xtrace)
 set -e  # shopt returns false on unset option, therefore wait until here with -e
 
 log() {
-	set +x
 	label=$1; shift
 	echo -e "[$label]: $*" >&2
-	$xtrace_level
 }
 debug() {
-	set +x
 	if [ -n "${HHDEBUG:-}" ]; then
 		log "DEBUG" "$@"
 	fi
-	$xtrace_level
 }
 error() {
 	log "ERROR" "$@"
@@ -104,14 +95,33 @@ else
 fi
 info "Install $PACKAGE"
 $ENV_PYTHON -m pip --isolated -q install --use-pep517 --upgrade "$PACKAGE"
-$xtrace_level
 
-if [ -n "$BASH_LINK_DIR" ]; then
-    bash_dir=$INSTALL_DIR/lib/python*/site-packages/bash
-    test -d $bash_dir
-    for file in $bash_dir/*; do
-        info "Installing $file"
-        ln -v -f -s $file $BASH_LINK_DIR/
+# Make the bash files
+bash_src=$(find $INSTALL_DIR/lib -type d -name bash -print -quit)
+debug "Distributed bash dir: $bash_src"
+test -n "$bash_src" && test -d "$bash_src"
+rm -rf $INSTALL_DIR/bash
+mkdir $INSTALL_DIR/bash
+shopt -s nullglob
+file_list=("$bash_src"/*.m4)
+shopt -u nullglob
+for file in ${file_list[*]}; do
+    dest="$INSTALL_DIR/bash/$(basename "$file" .m4)"
+    if ! type m4 > /dev/null 2>&1; then
+        info "$file: m4 not installed"
+        continue
+    fi
+    m4 -D INSTALL_DIR="$INSTALL_DIR" "$file" > "$dest"
+    info "Installed $dest"
+done
+
+# If $BASH_DIR is specified, install bash file into that directory.
+if [ -n "$BASH_DIR" ]; then
+    shopt -s nullglob
+	file_list=("$INSTALL_DIR/bash"/*)
+    shopt -u nullglob
+    for file in ${file_list[*]}; do
+        install -v -m 644 -b -S.bak -D -p -t "$BASH_DIR" "$file"
     done
 fi
 

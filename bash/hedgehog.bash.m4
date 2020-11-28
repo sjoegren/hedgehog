@@ -2,7 +2,7 @@
 _complete_sshansible() {
 	case ${COMP_WORDS[$COMP_CWORD]} in
 		-*)
-			COMPREPLY=($(compgen -W "--help --scp --last --ssh-copy-id" -- ${COMP_WORDS[$COMP_CWORD]}))
+			COMPREPLY=($(compgen -W "--help --scp --last --ssh-copy-id --version" -- ${COMP_WORDS[$COMP_CWORD]}))
 			;;
 		*)
 			if [ ${COMP_WORDS[(($COMP_CWORD - 1))]} == "--inventory" ]; then
@@ -22,3 +22,5 @@ _complete_sshansible() {
 }
 
 complete -F _complete_sshansible sshansible
+
+export PATH="$PATH:INSTALL_DIR/bin"
