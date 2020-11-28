@@ -7,7 +7,7 @@ INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/hedgehog}"
 PACKAGE="git+https://github.com/akselsjogren/hedgehog.git#egg=hedgehog"
 #PACKAGE="git+https://github.com/akselsjogren/hedgehog.git@devel#egg=hedgehog"
 MIN_VERSION_MAJOR=3
-MIN_VERSION_MINOR=8
+MIN_VERSION_MINOR=9
 STATUS_PYTHON_OK=0
 STATUS_PYTHON_NOK=3
 STATUS_PYTHON_PYENV=4

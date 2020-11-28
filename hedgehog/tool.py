@@ -68,12 +68,12 @@ def update_installer(installer_path, settings, args):
         ["git", "branch", "--show-current"], check=True, capture_output=True, text=True
     )
     branch = proc.stdout.strip()
-    if branch != "main":
-        data, changes = re.subn(
-            r'^(PACKAGE=".+\.git)(#egg.*")', rf"\g<1>@{branch}\g<2>", data, 1, re.M
-        )
-        if changes:
-            log.info("Updated package git url with branch '%s'", branch)
+    branch = "" if branch == "main" else f"@{branch}"
+    data, changes = re.subn(
+        r'^(PACKAGE=".+\.git).*(#egg.*")', rf"\g<1>{branch}\g<2>", data, 1, re.M
+    )
+    if changes:
+        log.info("Updated package git url with branch '%s'", branch)
 
     if not args.dryrun:
         installer_path.write_text(data)
