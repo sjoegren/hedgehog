@@ -1,4 +1,5 @@
 import collections
+import pathlib
 import re
 import warnings
 
@@ -6,18 +7,18 @@ from typing import Dict
 
 from .. import Error
 
-ANSIBLE_INVENTORY = "~/.ansible-inventory"
+ANSIBLE_INVENTORY = pathlib.Path.home() / ".ansible-inventory"
 
 Host = collections.namedtuple("Host", "name, address")
 
 
-def get_inventory(*, inventory=ANSIBLE_INVENTORY) -> Dict[str, Host]:
+def get_inventory(*, inventory=None) -> Dict[str, Host]:
     """Get all hosts from inventory. If `inventory` is set to None, default
     will be used."""
     hosts = {}
-    inventory = inventory or ANSIBLE_INVENTORY
+    inventory = pathlib.Path(inventory) if inventory else ANSIBLE_INVENTORY
     try:
-        with open(inventory) as fp:
+        with inventory.open() as fp:
             for line in fp:
                 if (match := re.match(r"(^[\w.-]+)\s.*?\bansible_host=(\S+)", line)) :
                     if match[1] in hosts:

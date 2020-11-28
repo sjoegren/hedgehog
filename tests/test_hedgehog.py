@@ -20,6 +20,7 @@ def test_run_package_as_module_prints_version():
     "name",
     [
         "hhdiff",
+        "sshansible",
     ],
 )
 def test_installed_scripts(name):
@@ -44,3 +45,11 @@ def test_error_exception_format(args, expected):
 
 def test_error_exception_retcode():
     assert hedgehog.Error("foo", retcode=2).retcode == 2
+
+
+def test_init_args():
+    parser = hedgehog.init_args(description="test text", prog="test")
+    args = parser.parse_args([])
+    assert parser.description == "test text"
+    assert parser.prog == "test"
+    assert args.cache_dir.is_dir()

@@ -1,7 +1,7 @@
 import argparse
+import shlex
 import sys
 import pathlib
-from os.path import basename
 
 __version__ = "0.1.0"
 
@@ -36,3 +36,11 @@ def init_args(**kwargs):
         version=f"%(prog)s {__version__}\nPython: {py_version} from {sys.exec_prefix}",
     )
     return parser
+
+
+def init_wrap(func, /, args):
+    """Call func and return it's return value, with a argv type list if args is
+    a string of arguments."""
+    if args is not None:
+        return func(shlex.split(args))
+    return func()

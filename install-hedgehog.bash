@@ -6,7 +6,7 @@ set -uo pipefail
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/hedgehog}"
 PACKAGE="git+https://github.com/akselsjogren/hedgehog#egg=hedgehog"
 MIN_VERSION_MAJOR=3
-MIN_VERSION_MINOR=7
+MIN_VERSION_MINOR=8
 STATUS_PYTHON_OK=0
 STATUS_PYTHON_NOK=3
 STATUS_PYTHON_PYENV=4
@@ -42,31 +42,34 @@ info() {
 
 hash python3
 
-# Check if we have a suitable pyenv version
-
-# Bail out if Python is < 3.7
+# Check if we have a Python version >= minimum version.
+# If current "python3" binary is new enough, use it.
+# Else, look for pyenv installations use the latest installed version if it
+# meets the minimum version.
 set +e
 output=$(python3 - <<EOF
 import os, re, sys
 from os.path import join, exists
 MIN_VERSION = ($MIN_VERSION_MAJOR, $MIN_VERSION_MINOR, 0)
-if sys.version_info < MIN_VERSION:
-	root = os.getenv('PYENV_ROOT')
-	if not (root and exists(join(root, "versions"))):
-		sys.exit($STATUS_PYTHON_NOK)
-	version_dir = os.path.join(root, "versions")
-	installed = [v for v in os.listdir(version_dir) if re.match(r'3\.\d+\.\d+', v)]
-	installed.sort(key=lambda v: tuple(int(n) for n in v.split('.')))
-	newest_installed = installed[-1]
-	if tuple(int(n) for n in newest_installed.split('.')) < MIN_VERSION:
-		sys.exit($STATUS_PYTHON_NOK)
-	print(newest_installed)
-	sys.exit($STATUS_PYTHON_PYENV)
+if sys.version_info >= MIN_VERSION:
+	sys.exit($STATUS_PYTHON_OK)
+root = os.getenv('PYENV_ROOT')
+if not (root and exists(join(root, "versions"))):
+	sys.exit($STATUS_PYTHON_NOK)
+version_dir = os.path.join(root, "versions")
+installed = [v for v in os.listdir(version_dir) if re.match(r'3\.\d+\.\d+', v)]
+installed.sort(key=lambda v: tuple(int(n) for n in v.split('.')))
+newest_installed = installed[-1]
+if tuple(int(n) for n in newest_installed.split('.')) < MIN_VERSION:
+	sys.exit($STATUS_PYTHON_NOK)
+print(newest_installed)
+sys.exit($STATUS_PYTHON_PYENV)
 EOF
 )
 exit_code=$?
 set -e
 
+# Bail out if Python version is lower than min version.
 case $exit_code in
 	$STATUS_PYTHON_OK)
 		debug "Python is new enough"
