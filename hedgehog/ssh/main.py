@@ -22,13 +22,10 @@ import sys
 import os
 
 from . import ansible
-from .. import init_args, init_wrap, Error, Print
-
-cprint = None
+from .. import Error, Print, init
 
 
-def init(*parse_args):
-    parser = init_args(description=__doc__)
+def _init(parser, argv: list, /):
     parser.add_argument("--complete-hosts", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument(
         "sshargs",
@@ -51,16 +48,19 @@ def init(*parse_args):
         "-l", "--last", action="store_true", help="ssh to last target used"
     )
     parser.add_argument("--dryrun", action="store_true", help=argparse.SUPPRESS)
-    args = parser.parse_args(*parse_args)
+    args = parser.parse_args(argv)
     if not (args.complete_hosts or args.last) and not args.sshargs:
         parser.error("hostname argument or --last is required")
-    global cprint
-    cprint = Print.instance(args.color)
     return args
 
 
 def main(*, cli_args: str = None):
-    args = init_wrap(init, cli_args)
+    args = init(
+        _init,
+        arguments=cli_args,
+        argp_kwargs=dict(description=__doc__),
+    )
+    cprint = Print.instance()
     cache_file = args.cache_dir / "sshansible_last_host"
     hostname = None
     inventory = ansible.get_inventory(inventory=os.getenv("ANSIBLE_INVENTORY"))

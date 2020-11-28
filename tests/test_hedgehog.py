@@ -1,6 +1,5 @@
-import subprocess
-
 import pytest
+import subprocess
 
 import hedgehog
 
@@ -47,9 +46,13 @@ def test_error_exception_retcode():
     assert hedgehog.Error("foo", retcode=2).retcode == 2
 
 
-def test_init_args():
-    parser = hedgehog.init_args(description="test text", prog="test")
-    args = parser.parse_args([])
-    assert parser.description == "test text"
-    assert parser.prog == "test"
+def test_init():
+    args = hedgehog.init(
+        lambda p, v: p.parse_args(v),
+        arguments="-vv --no-color",
+        logger=True,
+        argp_kwargs=dict(description="test text", prog="test"),
+    )
     assert args.cache_dir.is_dir()
+    assert args.verbose == 2
+    assert args.color is False

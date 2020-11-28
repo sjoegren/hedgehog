@@ -13,7 +13,7 @@ import sys
 
 from datetime import datetime, timezone
 
-from .. import init_args
+from .. import init
 from . import colordiff
 
 
@@ -22,8 +22,7 @@ def file_mtime(path):
     return t.astimezone().isoformat()
 
 
-def main():
-    parser = init_args(description=__doc__)
+def _init(parser, argv: list, /):
     parser.add_argument(
         "-c",
         "--context",
@@ -51,11 +50,18 @@ def main():
     )
     parser.add_argument("fromfile")
     parser.add_argument("tofile")
-    options = parser.parse_args()
+    return parser.parse_args(argv)
 
-    n = options.lines
-    fromfile = options.fromfile
-    tofile = options.tofile
+
+def main():
+    args = init(
+        _init,
+        argp_kwargs=dict(description=__doc__),
+    )
+
+    n = args.lines
+    fromfile = args.fromfile
+    tofile = args.tofile
 
     fromdate = file_mtime(fromfile)
     todate = file_mtime(tofile)
@@ -64,21 +70,21 @@ def main():
     with open(tofile) as tf:
         tolines = tf.readlines()
 
-    if options.unified:
+    if args.unified:
         diff = difflib.unified_diff(
             fromlines, tolines, fromfile, tofile, fromdate, todate, n=n
         )
-    elif options.context:
+    elif args.context:
         diff = difflib.context_diff(
             fromlines, tolines, fromfile, tofile, fromdate, todate, n=n
         )
-    elif options.html:
+    elif args.html:
         diff = difflib.HtmlDiff().make_file(
-            fromlines, tolines, fromfile, tofile, context=options.c, numlines=n
+            fromlines, tolines, fromfile, tofile, context=args.c, numlines=n
         )
     else:
         diff_gen = difflib.ndiff(fromlines, tolines)
-        diff = colordiff.color_diff_lines(diff_gen) if options.color else diff_gen
+        diff = colordiff.color_diff_lines(diff_gen) if args.color else diff_gen
 
     sys.stdout.writelines(diff)
 

@@ -1,8 +1,12 @@
 import argparse
+import json
+import logging
 import os
 import pathlib
 import shlex
 import sys
+
+from typing import Callable, Union
 
 import termcolor
 
@@ -32,8 +36,6 @@ class Print:
 
     def __init__(self, color):
         self.color = color
-        self._last_color = None
-        self._last_attrs = None
 
     @classmethod
     def instance(cls, color=False):
@@ -42,49 +44,140 @@ class Print:
             cls._instance = cls(color)
         return cls._instance
 
-    def __call__(self, string, /, color=None, *, attrs=None, reset=False, **kwargs):
+    def __call__(self, string, /, color=None, *, attrs=None, **kwargs):
         if self.color:
-            if reset:
-                self._last_color = None
-                self._last_attrs = None
-            if color:
-                self._last_color = color
-            else:
-                color = self._last_color
-            if attrs:
-                self._last_attrs = attrs
-            else:
-                attrs = self._last_attrs
-            termcolor.cprint(string, color=color, attrs=attrs, **kwargs)
+            termcolor.cprint(str(string), color=color, attrs=attrs, **kwargs)
         else:
             print(string, **kwargs)
 
+    def colored(self, string, /, color=None, *, attrs=None):
+        if self.color:
+            return termcolor.colored(string, color=color, attrs=attrs)
+        return string
 
-def init_args(**kwargs):
+
+class Logger(logging.getLoggerClass()):
+    def __init__(self, name):
+        super().__init__(name)
+
+    def debug_obj(self, obj, msg, *args, level=logging.DEBUG, **kwargs):
+        if getattr(self.root, "_hedgehog_debug", False) or level > logging.DEBUG:
+            data = json.dumps(obj, indent=4)
+            if getattr(self.root, "_color", False):
+                data = termcolor.colored(data, "red")
+            self.log(
+                level, msg + ". data:\n%s", *args, data, **kwargs
+            )
+
+
+def _argument_parser(logger: bool, argp_kwargs: dict):
     """Initialize an ArgumentParser with a "cache_dir" attribute."""
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.RawDescriptionHelpFormatter, **kwargs
-    )
-    parser.set_defaults(cache_dir=CACHE_DIR)
+    argp_kwargs.setdefault("formatter_class", argparse.RawDescriptionHelpFormatter)
+    par = argparse.ArgumentParser(**argp_kwargs)
     py_version = ".".join((str(x) for x in sys.version_info[:3]))
-    parser.add_argument(
+    par.add_argument(
         "-V",
         "--version",
         action="version",
         version=f"%(prog)s {__version__}\nPython: {py_version} from {sys.exec_prefix}",
     )
-    parser.add_argument(
+    par.add_argument(
         "--color",
         action=argparse.BooleanOptionalAction,
         default=os.isatty(0),
     )
-    return parser
+    if logger:
+        par.set_defaults(log_level=0)
+        par.add_argument(
+            "-v",
+            "--verbose",
+            action="count",
+            default=0,
+            help="Increase verbosity level.",
+        )
+        par.add_argument("--debug", action="store_true", help="Extra debug output.")
+    return par
 
 
-def init_wrap(func, /, args):
-    """Call func and return it's return value, with a argv type list if args is
-    a string of arguments."""
-    if args is not None:
-        return func(shlex.split(args))
-    return func()
+def init(
+    hook_func: Callable[[argparse.ArgumentParser, list], argparse.Namespace],
+    /,
+    *,
+    arguments: str = None,
+    logger=False,
+    argp_kwargs: dict = {},
+    default_loglevel: Union[int, str] = "INFO",
+    log_format_date=False,
+) -> argparse.Namespace:
+    """Initialize ArgumentParser and logging.
+
+    Create an ArgumentParser with default options.
+
+    Args:
+        hook_func: A callable `func(parser, argv, /)` which is passed the
+        ArgumentParser instance and argv which should be passed to
+        `parser.parse_args()`. hook_func must return the Namespace returned by
+        parse_args.
+
+        arguments: String with shell arguments to the program.
+
+        argp_kwargs: Keyword argument to pass to ArgumentParser().
+
+        logger: Whether a logger instance should be initialized.
+
+    Returns:
+        The same Namespace instance that hook_func returns.
+    """
+    argv = sys.argv[1:] if arguments is None else shlex.split(arguments)
+    parser = _argument_parser(logger, argp_kwargs)
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    parser.set_defaults(cache_dir=CACHE_DIR)
+    parser.set_defaults(log=None)
+    args = hook_func(parser, argv)
+
+    # Instantiate a Print object.
+    p = Print.instance(args.color)
+
+    # Adjust log level according to repeat of -v
+    if logger:
+        try:
+            default = getattr(logging, default_loglevel)
+        except TypeError:
+            default = default_loglevel
+        args.log_level = max(default - args.verbose * 10, logging.DEBUG)
+
+        logging.setLoggerClass(Logger)
+        log = logging.getLogger()
+        log.setLevel(args.log_level)
+        ch = logging.StreamHandler()
+        ch.setLevel(args.log_level)
+        datefmt = "{}%H:%M:%S".format("%Y-%m-%d" if log_format_date else "")
+
+        if args.log_level == logging.DEBUG:
+            fmt = logging.Formatter(
+                "{} {} [{}{}{}] {} %(message)s".format(
+                    p.colored("%(asctime)s", "magenta"),
+                    p.colored("%(name)s", "yellow"),
+                    p.colored("%(filename)s", "blue"),
+                    p.colored(":%(lineno)s", "red"),
+                    p.colored(":%(funcName)s", "yellow"),
+                    p.colored("%(levelname)s:", "magenta"),
+                ),
+                datefmt,
+            )
+        else:
+            fmt = logging.Formatter(
+                "{} {} %(message)s".format(
+                    p.colored("%(asctime)s", "magenta"),
+                    p.colored("%(levelname)s:", "magenta"),
+                ),
+                datefmt,
+            )
+        ch.setFormatter(fmt)
+        log.addHandler(ch)
+        log._hedgehog_debug = args.debug
+        log._color = args.color
+        args.root_logger = log
+        log.debug("Logging initialized. Args: %s", args)
+
+    return args
