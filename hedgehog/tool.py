@@ -13,7 +13,8 @@ import subprocess
 
 import toml
 
-from . import init, Print, Error, META_FILE
+import hedgehog
+from . import Print, Error, META_FILE
 
 PROJECT_FILE = pathlib.Path.cwd() / "pyproject.toml"
 INSTALLER = pathlib.Path.cwd() / "install-hedgehog.bash"
@@ -43,7 +44,7 @@ def _init(parser, argv: list, /):
 
 
 def main(*, cli_args: str = None):
-    args = init(
+    args = hedgehog.init(
         _init,
         arguments=cli_args,
         logger=True,
@@ -54,11 +55,23 @@ def main(*, cli_args: str = None):
     log = logging.getLogger("tool")
     settings = toml.load(args.pyproject)
     log.debug_obj(settings, "pyproject settings")
-    check_repo_status(args)
+
+    fail_dirty = False
+    if not repo_is_clean(args) and not args.dryrun:
+        fail_dirty = True
+        args.dryrun = True
+
     update_installer(INSTALLER, settings, args)
     meta = get_metadata(settings, args)
     write_package_metadata(meta, args)
     write_readme(meta, settings["tool"]["poetry"]["readme"], args)
+    update_package_version(meta, args)
+
+    if fail_dirty:
+        raise Error(
+            "Did not write to any files since repo is dirty. "
+            "Stash or commit any changes and try again."
+        )
 
 
 def update_installer(installer_path, settings, args):
@@ -113,15 +126,12 @@ def write_readme(meta, filename, args):
     extra_content = []
     for name in sorted(meta["scripts"]):
         extra_content.append(f"* `{name}`: {meta['scripts'][name]['brief']}")
+        log.debug("Write to %s: %r", filename, extra_content[-1])
     log.debug("New %s contents: %s", readme, extra_content)
-    new, changes = re.subn(
-        r"<!-- following is automatically generated -->",
-        "\\g<0>\n" + "\n".join(extra_content),
-        previous,
-        count=1,
+    match = re.search(
+        r"^<!-- following is automatically generated -->$", previous, flags=re.M
     )
-    log.info("%s changes: %d", filename, changes)
-
+    new = previous[: match.end() + 1] + "\n".join(extra_content) + "\n"
     if not args.dryrun:
         readme.write_text(new)
         log.info("Wrote back changes to %s", readme)
@@ -131,11 +141,25 @@ def write_package_metadata(meta, args):
     log.info("Metadata file: %s, exists: %s", META_FILE, META_FILE.exists())
     if not args.dryrun:
         with META_FILE.open("w") as metafile:
-            json.dump(meta, metafile)
+            json.dump(meta, metafile, indent=4)
         log.info("Wrote back changes to %s", META_FILE)
 
 
-def check_repo_status(args):
+def update_package_version(meta, args):
+    """Update __version__ in the main package."""
+    pkgfile = pathlib.Path(hedgehog.__loader__.path)
+    data = pkgfile.read_text()
+    regex = re.compile(r'^(__version__ = )"(.+)"$', flags=re.M)
+    old_version = regex.search(data).group(2)
+    new, changes = regex.subn(rf'\1"{meta["version"]}"', data, count=1)
+    if changes:
+        log.info("Changed version %r -> %r", old_version, meta["version"])
+        if not args.dryrun:
+            pkgfile.write_text(new)
+            log.info("Wrote back %d changes to %s", changes, pkgfile)
+
+
+def repo_is_clean(args) -> bool:
     proc = subprocess.run(
         ["git", "status", "--porcelain=1", "-z"],
         check=True,
@@ -143,14 +167,12 @@ def check_repo_status(args):
         text=True,
     )
     out = proc.stdout.strip()
+    rv = True
     for entry in out.split("\0"):
         if re.match(r"\w", entry[:2]):
             log.error("unclean repo: %s", entry)
-            if not args.dryrun:
-                raise Error(
-                    "Will not write to any files while repo is dirty. "
-                    "Stash or commit any changes and try again."
-                )
+            rv = False
+    return rv
 
 
 if __name__ == "__main__":
