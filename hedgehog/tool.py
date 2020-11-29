@@ -4,6 +4,7 @@ For development use.
 Will update bash installer, README and some files.
 """
 import argparse
+import importlib
 import logging
 import sys
 import pathlib
@@ -21,7 +22,9 @@ log = None
 
 
 def _init(parser, argv: list, /):
-    parser.add_argument("-n", "--dryrun", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument(
+        "-n", "--dryrun", action="store_true", help="Don't write any changes."
+    )
     parser.add_argument(
         "--pyproject",
         metavar="FILE",
@@ -46,6 +49,8 @@ def main(*, cli_args: str = None):
     settings = toml.load(args.pyproject)
     log.debug_obj(settings, "pyproject settings")
     update_installer(INSTALLER, settings, args)
+    scripts = get_scripts_metadata(settings, args)
+    write_readme(scripts, settings['tool']['poetry']['readme'], args)
 
 
 def update_installer(installer_path, settings, args):
@@ -78,6 +83,34 @@ def update_installer(installer_path, settings, args):
     if not args.dryrun:
         installer_path.write_text(data)
         log.info("Wrote back changes to %s", installer_path)
+
+
+def get_scripts_metadata(settings, args):
+    scripts = {}
+    for name, path in settings['tool']['poetry']['scripts'].items():
+        log.debug("%s: %s", name, path)
+        modpath = path.split(":")[0]
+        module = importlib.import_module(modpath)
+        log.debug("imported %s", module)
+        description = module.__doc__.strip()
+        brief = re.split(r'\.[\s"]', description, maxsplit=1)[0].replace("\n", ' ')
+        log.info("%s: %s", name, brief)
+        scripts[name] = {'brief': brief, 'description': description}
+    return scripts
+
+
+def write_readme(scripts, filename, args):
+    readme = pathlib.Path(filename)
+    previous = readme.read_text()
+    pos = previous.index("<!-- following is automatically generated -->")
+    new = previous[:pos]
+    for name in sorted(scripts):
+        new += f"* `{name}`: {scripts[name]['brief']}\n"
+    log.debug("New %s contents: %s", readme, new)
+    if not args.dryrun:
+        readme.write_text(new)
+        log.info("Wrote back changes to %s", readme)
+
 
 
 if __name__ == "__main__":
