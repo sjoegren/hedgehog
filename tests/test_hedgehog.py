@@ -4,10 +4,6 @@ import subprocess
 import hedgehog
 
 
-def test_version():
-    assert hedgehog.__version__ == "0.1.0"
-
-
 def test_run_package_as_module_prints_version():
     proc = subprocess.run(
         ["python", "-m", "hedgehog"], check=True, capture_output=True, text=True

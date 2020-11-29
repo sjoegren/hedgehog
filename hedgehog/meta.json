@@ -1,0 +1,20 @@
+{
+    "scripts": {
+        "hedgehog": {
+            "brief": "Provide information about available tools.",
+            "description": "Provide information about available tools."
+        },
+        "hhdiff": {
+            "brief": "Multiple diff formats - colorize intraline diffs",
+            "description": "Multiple diff formats - colorize intraline diffs.\n\n* ndiff:    lists every line and highlights interline changes.\n* context:  highlights clusters of changes in a before/after format.\n* unified:  highlights clusters of changes in an inline format.\n* html:     generates side by side comparison with change highlights."
+        },
+        "sshansible": {
+            "brief": "SSH to hostnames in an ansible-inventory using \"ansible_host\" address instead of name resolution",
+            "description": "SSH to hostnames in an ansible-inventory using \"ansible_host\" address instead\nof name resolution.\n\nGiven an inventory file like this:\n\n    [buildslaves]\n    foo     ansible_host=192.0.2.1\n\nRunning 'sshansible.py -- -v foo', will exec the command:\n  ssh -o Hostname=192.0.2.1 -v foo\n\nThat way any config in 'ssh_config' for host 'foo' will still be honored.\n\nscp:\n    sshansible.py --scp bar -- /etc/foo.conf bar:/tmp"
+        }
+    },
+    "name": "hedgehog",
+    "version": "0.1.1",
+    "description": "Random and somewhat useful tools",
+    "repository": "https://github.com/akselsjogren/hedgehog"
+}
