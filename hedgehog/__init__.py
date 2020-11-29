@@ -125,7 +125,6 @@ def init(
     logger=False,
     argp_kwargs: dict = {},
     default_loglevel: Union[int, str] = "INFO",
-    log_format_date=False,
 ) -> argparse.Namespace:
     """Initialize ArgumentParser and logging.
 
@@ -134,8 +133,11 @@ def init(
     Args:
         hook_func: A callable `func(parser, argv, /)` which is passed the
         ArgumentParser instance and argv which should be passed to
-        `parser.parse_args()`. hook_func must return the Namespace returned by
-        parse_args.
+        `parser.parse_args()`. hook_func must return a dict with a mandatory
+        key `args` containing the Namespace object returned by parse_args.
+        Other valid options for the return dict are:
+            * log_format: str
+            * log_format_date: bool
 
         arguments: String with shell arguments to the program.
 
@@ -152,6 +154,10 @@ def init(
     parser.set_defaults(cache_dir=CACHE_DIR)
     parser.set_defaults(log=None)
     args = hook_func(parser, argv)
+    if isinstance(args, tuple):
+        args, options, *_ = args
+    else:
+        options = {}
 
     # Instantiate a Print object.
     p = Print.instance(args.color)
@@ -169,7 +175,9 @@ def init(
         log.setLevel(args.log_level)
         ch = logging.StreamHandler()
         ch.setLevel(args.log_level)
-        datefmt = "{}%H:%M:%S".format("%Y-%m-%d" if log_format_date else "")
+        datefmt = "{}%H:%M:%S".format(
+            "%Y-%m-%d" if options.get("log_format_date") else ""
+        )
 
         if args.log_level == logging.DEBUG:
             fmt = logging.Formatter(
@@ -184,13 +192,14 @@ def init(
                 datefmt,
             )
         else:
-            fmt = logging.Formatter(
+            log_format = options.get(
+                "log_format",
                 "{} {} %(message)s".format(
                     p.colored("%(asctime)s", "magenta"),
                     p.colored("%(levelname)s:", "magenta"),
                 ),
-                datefmt,
             )
+            fmt = logging.Formatter(log_format, datefmt)
         ch.setFormatter(fmt)
         log.addHandler(ch)
         log._hedgehog_debug = args.debug

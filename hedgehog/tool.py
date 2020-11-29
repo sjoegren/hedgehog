@@ -3,7 +3,6 @@ For development use.
 
 Will update bash installer, README and some files.
 """
-import argparse
 import importlib
 import json
 import logging
@@ -34,7 +33,13 @@ def _init(parser, argv: list, /):
         help=f"Default: {PROJECT_FILE}",
     )
     args = parser.parse_args(argv)
-    return args
+    p = Print.instance(args.color)
+    log_format = "{} {} {} %(message)s".format(
+        p.colored("%(asctime)s", "magenta"),
+        p.colored("%(levelname)s", "magenta"),
+        p.colored("%(funcName)25s:", "yellow"),
+    )
+    return args, {"log_format": log_format}
 
 
 def main(*, cli_args: str = None):
