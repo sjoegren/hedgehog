@@ -33,6 +33,9 @@ def _init(parser, argv: list, /):
         default=PROJECT_FILE,
         help=f"Default: {PROJECT_FILE}",
     )
+    parser.add_argument(
+        "--check-clean", action="store_true", help="Exit 1 if repo isn't clean."
+    )
     args = parser.parse_args(argv)
     p = Print.instance(args.color)
     log_format = "{} {} {} %(message)s".format(
@@ -53,11 +56,15 @@ def main(*, cli_args: str = None):
     )
     global log
     log = logging.getLogger("tool")
+    if args.check_clean:
+        if not repo_is_clean():
+            sys.exit(1)
+        return
     settings = toml.load(args.pyproject)
     log.debug_obj(settings, "pyproject settings")
 
     fail_dirty = False
-    if not repo_is_clean(args) and not args.dryrun:
+    if not repo_is_clean() and not args.dryrun:
         fail_dirty = True
         args.dryrun = True
 
@@ -159,7 +166,7 @@ def update_package_version(meta, args):
             log.info("Wrote back %d changes to %s", changes, pkgfile)
 
 
-def repo_is_clean(args) -> bool:
+def repo_is_clean() -> bool:
     proc = subprocess.run(
         ["git", "status", "--porcelain=1", "-z"],
         check=True,
