@@ -1,10 +1,10 @@
-"""Command line interface to difflib.py providing diffs in four formats:
+"""
+Multiple diff formats - colorize intraline diffs.
 
 * ndiff:    lists every line and highlights interline changes.
 * context:  highlights clusters of changes in a before/after format.
 * unified:  highlights clusters of changes in an inline format.
 * html:     generates side by side comparison with change highlights.
-
 """
 
 import difflib

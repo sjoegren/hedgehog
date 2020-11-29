@@ -1,6 +1,6 @@
 """
-SSH to hostnames in an ansible-inventory file when using inventory's
-"ansible_host" keys instead of name resolution.
+SSH to hostnames in an ansible-inventory using "ansible_host" address instead
+of name resolution.
 
 Given an inventory file like this:
 
