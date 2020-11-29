@@ -1,4 +1,5 @@
 import argparse
+import importlib.resources
 import json
 import logging
 import os
@@ -13,6 +14,7 @@ import termcolor
 __version__ = "0.1.0"
 
 CACHE_DIR = pathlib.Path.home() / ".cache/hedgehog"
+META_FILE = importlib.resources.files(__package__) / "meta.json"
 
 
 class Error(Exception):

@@ -5,6 +5,7 @@ Will update bash installer, README and some files.
 """
 import argparse
 import importlib
+import json
 import logging
 import sys
 import pathlib
@@ -13,7 +14,7 @@ import subprocess
 
 import toml
 
-from . import init, Print, Error
+from . import init, Print, Error, META_FILE
 
 PROJECT_FILE = pathlib.Path.cwd() / "pyproject.toml"
 INSTALLER = pathlib.Path.cwd() / "install-hedgehog.bash"
@@ -48,9 +49,11 @@ def main(*, cli_args: str = None):
     log = logging.getLogger("tool")
     settings = toml.load(args.pyproject)
     log.debug_obj(settings, "pyproject settings")
+    check_repo_status(args)
     update_installer(INSTALLER, settings, args)
-    scripts = get_scripts_metadata(settings, args)
-    write_readme(scripts, settings['tool']['poetry']['readme'], args)
+    meta = get_metadata(settings, args)
+    write_package_metadata(meta, args)
+    write_readme(meta, settings["tool"]["poetry"]["readme"], args)
 
 
 def update_installer(installer_path, settings, args):
@@ -85,32 +88,64 @@ def update_installer(installer_path, settings, args):
         log.info("Wrote back changes to %s", installer_path)
 
 
-def get_scripts_metadata(settings, args):
-    scripts = {}
-    for name, path in settings['tool']['poetry']['scripts'].items():
-        log.debug("%s: %s", name, path)
+def get_metadata(settings, args):
+    meta = {"scripts": {}}
+    for key in ("name", "version", "description", "repository"):
+        meta[key] = settings["tool"]["poetry"][key]
+    for name, path in settings["tool"]["poetry"]["scripts"].items():
         modpath = path.split(":")[0]
         module = importlib.import_module(modpath)
-        log.debug("imported %s", module)
         description = module.__doc__.strip()
-        brief = re.split(r'\.[\s"]', description, maxsplit=1)[0].replace("\n", ' ')
+        brief = re.split(r'\.[\s"]', description, maxsplit=1)[0].replace("\n", " ")
         log.info("%s: %s", name, brief)
-        scripts[name] = {'brief': brief, 'description': description}
-    return scripts
+        meta["scripts"][name] = {"brief": brief, "description": description}
+    return meta
 
 
-def write_readme(scripts, filename, args):
+def write_readme(meta, filename, args):
     readme = pathlib.Path(filename)
     previous = readme.read_text()
-    pos = previous.index("<!-- following is automatically generated -->")
-    new = previous[:pos]
-    for name in sorted(scripts):
-        new += f"* `{name}`: {scripts[name]['brief']}\n"
-    log.debug("New %s contents: %s", readme, new)
+    extra_content = []
+    for name in sorted(meta["scripts"]):
+        extra_content.append(f"* `{name}`: {meta['scripts'][name]['brief']}")
+    log.debug("New %s contents: %s", readme, extra_content)
+    new, changes = re.subn(
+        r"<!-- following is automatically generated -->",
+        "\\g<0>\n" + "\n".join(extra_content),
+        previous,
+        count=1,
+    )
+    log.info("%s changes: %d", filename, changes)
+
     if not args.dryrun:
         readme.write_text(new)
         log.info("Wrote back changes to %s", readme)
 
+
+def write_package_metadata(meta, args):
+    log.info("Metadata file: %s, exists: %s", META_FILE, META_FILE.exists())
+    if not args.dryrun:
+        with META_FILE.open("w") as metafile:
+            json.dump(meta, metafile)
+        log.info("Wrote back changes to %s", META_FILE)
+
+
+def check_repo_status(args):
+    proc = subprocess.run(
+        ["git", "status", "--porcelain=1", "-z"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    out = proc.stdout.strip()
+    for entry in out.split("\0"):
+        if re.match(r"\w", entry[:2]):
+            log.error("unclean repo: %s", entry)
+            if not args.dryrun:
+                raise Error(
+                    "Will not write to any files while repo is dirty. "
+                    "Stash or commit any changes and try again."
+                )
 
 
 if __name__ == "__main__":
