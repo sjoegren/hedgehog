@@ -151,8 +151,7 @@ def init(
     argv = sys.argv[1:] if arguments is None else shlex.split(arguments)
     parser = _argument_parser(logger, argp_kwargs)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    parser.set_defaults(cache_dir=CACHE_DIR)
-    parser.set_defaults(log=None)
+    parser.set_defaults(cache_dir=CACHE_DIR, prog_name=parser.prog)
     args = hook_func(parser, argv)
     if isinstance(args, tuple):
         args, options, *_ = args
@@ -181,7 +180,7 @@ def init(
 
         if args.log_level == logging.DEBUG:
             fmt = logging.Formatter(
-                "{} {} [{}{}{}] {} %(message)s".format(
+                "{} {} [{}{}{}] %(threadName)s {} %(message)s".format(
                     p.colored("%(asctime)s", "magenta"),
                     p.colored("%(name)s", "yellow"),
                     p.colored("%(filename)s", "blue"),
