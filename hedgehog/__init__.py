@@ -11,7 +11,7 @@ from typing import Callable, Union
 
 import termcolor
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 CACHE_DIR = pathlib.Path.home() / ".cache/hedgehog"
 META_FILE = importlib.resources.files(__package__) / "meta.json"

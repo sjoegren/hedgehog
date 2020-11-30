@@ -14,7 +14,7 @@
         }
     },
     "name": "hedgehog",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Random and somewhat useful tools",
     "repository": "https://github.com/akselsjogren/hedgehog"
 }
