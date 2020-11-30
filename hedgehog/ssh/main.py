@@ -93,7 +93,7 @@ def main(*, cli_args: str = None):
         if not args.sshargs:
             args.sshargs.append(hostname)
     elif args.list:
-        list_inventory(inventory)
+        list_inventory(inventory, cache_file)
         return
 
     if not hostname:
@@ -136,7 +136,7 @@ def host_status(task_q, result_q):
     task_q.task_done()
 
 
-def list_inventory(inventory):
+def list_inventory(inventory, cache_file):
     task_q = queue.Queue()
     threads = []
     result_q = queue.Queue()
@@ -147,20 +147,31 @@ def list_inventory(inventory):
         t.start()
     maxhostlen = max(len(h.name) for h in inventory.values())
     print(
-        "Hostname{padding}  Address          Status  URL".format(
+        "Hostname{padding}  Address          Status   URL".format(
             padding=" " * (maxhostlen - 8)
         )
     )
+    try:
+        lasthost = cache_file.read_text()
+    except OSError:
+        lasthost = None
+
+    cprint = Print.instance()
     # print hosts as soon as they are ready
     for _ in range(len(threads)):
         # Get the number of results as we've created threads.
         thread, host, status = result_q.get(timeout=5)
         thread.join()
         print(
-            "{0:<{colwidth}}  {1:<15}  {2:<6}  https://{1}".format(
-                host.name,
+            "{0:<{colwidth}}  {1:<15}  {2:<7}  https://{1}".format(
+                cprint.colored(
+                    "{:<{colwidth}}".format(host.name, colwidth=maxhostlen),
+                    "cyan" if lasthost and host.name == lasthost else None,
+                ),
                 host.address,
-                "Online" if status else "-",
+                cprint.colored("{:<7}".format("online"), "green")
+                if status
+                else cprint.colored("{:<7}".format("offline"), "red"),
                 colwidth=maxhostlen,
             )
         )
