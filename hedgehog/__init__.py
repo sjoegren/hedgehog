@@ -73,7 +73,12 @@ class Logger(logging.getLoggerClass()):
 
     def debug_obj(self, obj, msg, *args, level=logging.DEBUG, **kwargs):
         if getattr(self.root, "_hedgehog_debug", False) or level > logging.DEBUG:
-            data = json.dumps(obj, indent=4)
+            if isinstance(obj, str):
+                data = obj
+            elif isinstance(obj, bytes):
+                data = str(obj)
+            else:
+                data = json.dumps(obj, indent=4)
             if getattr(self.root, "_color", False):
                 data = termcolor.colored(data, "green")
             self.log(level, msg + ". data:\n%s", *args, data, **kwargs)

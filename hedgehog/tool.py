@@ -132,13 +132,24 @@ def write_readme(meta, filename, args):
     previous = readme.read_text()
     extra_content = []
     for name in sorted(meta["scripts"]):
-        extra_content.append(f"* `{name}`: {meta['scripts'][name]['brief']}")
-        log.debug("Write to %s: %r", filename, extra_content[-1])
-    log.debug("New %s contents: %s", readme, extra_content)
+        if name == "hedgehog":
+            continue
+        log.debug("run %s --help", name)
+        proc = subprocess.run(
+            [name, "--help"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        extra_content.append(f"### {name}")
+        extra_content.append(f"```\n{proc.stdout}\n```")
+
+    extra_content = "\n".join(extra_content)
+    log.debug_obj(extra_content, "New %s contents", readme)
     match = re.search(
         r"^<!-- following is automatically generated -->$", previous, flags=re.M
     )
-    new = previous[: match.end() + 1] + "\n".join(extra_content) + "\n"
+    new = previous[: match.end() + 1] + extra_content + "\n"
     if not args.dryrun:
         readme.write_text(new)
         log.info("Wrote back changes to %s", readme)
