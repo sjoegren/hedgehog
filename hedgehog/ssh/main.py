@@ -24,8 +24,9 @@ import sys
 import threading
 import time
 
+import hedgehog
 from . import ansible
-from .. import Error, Print, init
+from .. import Error, Print
 
 log = None
 
@@ -62,15 +63,24 @@ def _init(parser, argv: list, /):
     parser.add_argument(
         "-L", "--list", action="store_true", help="List hosts in inventory"
     )
+    parser.add_argument(
+        "--ssh-config",
+        action="store_true",
+        help="Re-write host aliases to ssh_config from ansible "
+        "inventory. Normally this is done automatically on each invocation.",
+    )
     parser.add_argument("--dryrun", "--ip", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
-    if not (args.complete_hosts or args.last or args.list) and not args.sshargs:
+    if (
+        not (args.complete_hosts or args.last or args.list or args.ssh_config)
+        and not args.sshargs
+    ):
         parser.error("hostname argument or --last is required")
     return args
 
 
 def main(*, cli_args: str = None):
-    args = init(
+    args = hedgehog.init(
         _init,
         arguments=cli_args,
         logger=True,
@@ -79,9 +89,17 @@ def main(*, cli_args: str = None):
     global log
     log = logging.getLogger(args.prog_name)
     cprint = Print.instance()
-    cache_file = args.cache_dir / "sshansible_last_host"
+    cache_file = hedgehog.CACHE_DIR / "sshansible_last_host"
     hostname = None
     inventory = ansible.get_inventory(inventory=os.getenv("ANSIBLE_INVENTORY"))
+
+    ssh_config = hedgehog.TEMP_DIR / "ssh_config"
+    if inventory and (args.ssh_config or not ssh_config.exists()):
+        log.info("Write inventory of %d hosts to %s", len(inventory), ssh_config)
+        ansible.write_ssh_config(ssh_config, inventory.values())
+    if args.ssh_config:
+        return
+
     if args.complete_hosts:
         print("\t".join(inventory.keys()))
         return True

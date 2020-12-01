@@ -1,9 +1,10 @@
 import collections
 import pathlib
 import re
+import textwrap
 import warnings
 
-from typing import Dict
+from typing import Dict, Iterable
 
 from .. import Error
 
@@ -27,3 +28,20 @@ def get_inventory(*, inventory=None) -> Dict[str, Host]:
     except OSError as err:
         raise Error(f"Failed to read inventory: {err}") from err
     return hosts
+
+
+def write_ssh_config(ssh_config: str, inventory: Iterable[Host], /):
+    path = pathlib.Path(ssh_config).expanduser()
+    lines = []
+    for host in inventory:
+        lines.append(
+            textwrap.dedent(
+                f"""\
+                Host {host.name}
+                    Hostname {host.address}
+                    User root
+                    LocalForward 13306 localhost:3306
+                """
+            )
+        )
+    path.write_text("\n".join(lines))

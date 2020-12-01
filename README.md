@@ -40,6 +40,7 @@ optional arguments:
 ```
 usage: sshansible [-h] [-V] [--color | --no-color] [-v] [--debug]
                   [--scp [hostname]] [-c FILE] [--copy-id] [-l] [-L]
+                  [--ssh-config]
                   [arg ...]
 
 SSH to hostnames in an ansible-inventory using "ansible_host" address instead
@@ -76,5 +77,8 @@ optional arguments:
   --copy-id             Run ssh-copy-id instead of ssh
   -l, --last            ssh to last target used
   -L, --list            List hosts in inventory
+  --ssh-config          Re-write host aliases to ssh_config from ansible
+                        inventory. Normally this is done automatically on each
+                        invocation.
 
 ```

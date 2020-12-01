@@ -1,3 +1,4 @@
+import logging
 import pytest
 import subprocess
 
@@ -47,8 +48,10 @@ def test_init():
         lambda p, v: p.parse_args(v),
         arguments="-vv --no-color",
         logger=True,
+        default_loglevel="CRITICAL",
         argp_kwargs=dict(description="test text", prog="test"),
     )
-    assert args.cache_dir.is_dir()
+    assert hedgehog.CACHE_DIR.is_dir()
     assert args.verbose == 2
     assert args.color is False
+    assert logging.getLogger().getEffectiveLevel() == logging.WARNING

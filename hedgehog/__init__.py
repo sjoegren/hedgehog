@@ -14,6 +14,7 @@ import termcolor
 __version__ = "0.1.2"
 
 CACHE_DIR = pathlib.Path.home() / ".cache/hedgehog"
+TEMP_DIR = pathlib.Path("/var/run/user") / str(os.getuid()) / "hedgehog"
 META_FILE = importlib.resources.files(__package__) / "meta.json"
 
 
@@ -94,7 +95,7 @@ class Logger(logging.getLoggerClass()):
 
 
 def _argument_parser(logger: bool, argp_kwargs: dict):
-    """Initialize an ArgumentParser with a "cache_dir" attribute."""
+    """Initialize an ArgumentParser with some default arguments."""
     argp_kwargs.setdefault("formatter_class", argparse.RawDescriptionHelpFormatter)
     par = argparse.ArgumentParser(**argp_kwargs)
     py_version = ".".join((str(x) for x in sys.version_info[:3]))
@@ -110,7 +111,6 @@ def _argument_parser(logger: bool, argp_kwargs: dict):
         default=os.isatty(0),
     )
     if logger:
-        par.set_defaults(log_level=0)
         par.add_argument(
             "-v",
             "--verbose",
@@ -119,6 +119,7 @@ def _argument_parser(logger: bool, argp_kwargs: dict):
             help="Increase verbosity level.",
         )
         par.add_argument("--debug", action="store_true", help="Extra debug output.")
+    par.set_defaults(prog_name=par.prog)
     return par
 
 
@@ -156,59 +157,62 @@ def init(
     argv = sys.argv[1:] if arguments is None else shlex.split(arguments)
     parser = _argument_parser(logger, argp_kwargs)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    parser.set_defaults(cache_dir=CACHE_DIR, prog_name=parser.prog)
+    TEMP_DIR.mkdir(exist_ok=True)
     args = hook_func(parser, argv)
     if isinstance(args, tuple):
-        args, options, *_ = args
+        args, client_options, *_ = args
     else:
-        options = {}
+        client_options = {}
 
-    # Instantiate a Print object.
-    p = Print.instance(args.color)
+    # Instantiate a singleton instance of Print w/wo colors.
+    Print.instance(args.color)
 
-    # Adjust log level according to repeat of -v
     if logger:
-        try:
-            default = getattr(logging, default_loglevel)
-        except TypeError:
-            default = default_loglevel
-        args.log_level = max(default - args.verbose * 10, logging.DEBUG)
-
-        logging.setLoggerClass(Logger)
-        log = logging.getLogger()
-        log.setLevel(args.log_level)
-        ch = logging.StreamHandler()
-        ch.setLevel(args.log_level)
-        datefmt = "{}%H:%M:%S".format(
-            "%Y-%m-%d" if options.get("log_format_date") else ""
-        )
-
-        if args.log_level == logging.DEBUG:
-            fmt = logging.Formatter(
-                "{} {} [{}{}{}] %(threadName)s {} %(message)s".format(
-                    p.colored("%(asctime)s", "magenta"),
-                    p.colored("%(name)s", "yellow"),
-                    p.colored("%(filename)s", "blue"),
-                    p.colored(":%(lineno)s", "red"),
-                    p.colored(":%(funcName)s", "yellow"),
-                    p.colored("%(levelname)s:", "magenta"),
-                ),
-                datefmt,
-            )
-        else:
-            log_format = options.get(
-                "log_format",
-                "{} {} %(message)s".format(
-                    p.colored("%(asctime)s", "magenta"),
-                    p.colored("%(levelname)s:", "magenta"),
-                ),
-            )
-            fmt = logging.Formatter(log_format, datefmt)
-        ch.setFormatter(fmt)
-        log.addHandler(ch)
-        log._hedgehog_debug = args.debug
-        log._color = args.color
-        args.root_logger = log
-        log.debug("Logging initialized. Args: %s", args)
+        logger = _init_logging(default_loglevel, args.verbose, client_options)
+        # So that Logger class can know if it should do debug_obj/color.
+        logger._hedgehog_debug = args.debug
+        logger._color = args.color
 
     return args
+
+
+def _init_logging(default_level: str, verbosity: int, options: dict, /) -> Logger:
+    try:
+        default = getattr(logging, default_level)
+    except TypeError:
+        default = default_level
+    # Adjust log level according to repeat of -v
+    log_level = max(default - verbosity * 10, logging.DEBUG)
+
+    logging.setLoggerClass(Logger)
+    log = logging.getLogger()
+    log.setLevel(log_level)
+    ch = logging.StreamHandler()
+    ch.setLevel(log_level)
+    datefmt = "{}%H:%M:%S".format("%Y-%m-%d" if options.get("log_format_date") else "")
+
+    p = Print.instance()
+    if log_level == logging.DEBUG:
+        fmt = logging.Formatter(
+            "{} {} [{}{}{}] %(threadName)s {} %(message)s".format(
+                p.colored("%(asctime)s", "magenta"),
+                p.colored("%(name)s", "yellow"),
+                p.colored("%(filename)s", "blue"),
+                p.colored(":%(lineno)s", "red"),
+                p.colored(":%(funcName)s", "yellow"),
+                p.colored("%(levelname)s:", "magenta"),
+            ),
+            datefmt,
+        )
+    else:
+        log_format = options.get(
+            "log_format",
+            "{} {} %(message)s".format(
+                p.colored("%(asctime)s", "magenta"),
+                p.colored("%(levelname)s:", "magenta"),
+            ),
+        )
+        fmt = logging.Formatter(log_format, datefmt)
+    ch.setFormatter(fmt)
+    log.addHandler(ch)
+    return log
