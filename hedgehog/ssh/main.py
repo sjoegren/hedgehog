@@ -62,7 +62,7 @@ def _init(parser, argv: list, /):
     parser.add_argument(
         "-L", "--list", action="store_true", help="List hosts in inventory"
     )
-    parser.add_argument("--dryrun", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--dryrun", "--ip", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     if not (args.complete_hosts or args.last or args.list) and not args.sshargs:
         parser.error("hostname argument or --last is required")
@@ -116,9 +116,11 @@ def main(*, cli_args: str = None):
     if args.remote_cmd:
         return run_remote_command(args.remote_cmd, hostname, host.address, exec_args)
 
-    cprint(f"exec: {' '.join(exec_args)}", "yellow")
+    cprint(f"exec: {' '.join(exec_args)}", "yellow", file=sys.stderr)
     sys.stdout.flush()
-    if not args.dryrun:
+    if args.dryrun:
+        print(host.address)
+    else:
         os.execlp(command, *exec_args)
 
 
