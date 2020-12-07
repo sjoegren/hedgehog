@@ -34,13 +34,21 @@ def write_ssh_config(ssh_config: str, inventory: Iterable[Host], /):
     path = pathlib.Path(ssh_config).expanduser()
     lines = []
     for host in inventory:
+        extra = ""
+        if "el6" in host.name.lower():
+            extra = "PubkeyAcceptedKeyTypes ssh-rsa"
         lines.append(
             textwrap.dedent(
                 f"""\
                 Host {host.name}
                     Hostname {host.address}
                     User root
+                    {extra}
+                Host {host.name}-tunnel
+                    Hostname {host.address}
+                    User root
                     LocalForward 13306 localhost:3306
+                    {extra}
                 """
             )
         )
