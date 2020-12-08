@@ -11,6 +11,7 @@ exclude = ["hedgehog/tool.py"]
 [tool.poetry.dependencies]
 python = "^3.9"
 termcolor = "^1.1.0"
+simple-term-menu = "^0.10.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
