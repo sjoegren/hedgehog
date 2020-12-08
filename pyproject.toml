@@ -20,6 +20,7 @@ black = "^20.8b1"
 toml = "^0.10.2"
 
 [tool.poetry.scripts]
+git-fixup = "hedgehog.git.fixup:main_wrap"
 hedgehog = "hedgehog.help:main"
 hhdiff = "hedgehog.diff.__main__:main"
 sshansible = "hedgehog.ssh.main:main_wrap"
