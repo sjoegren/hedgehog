@@ -135,12 +135,15 @@ def write_readme(meta, filename, args):
         if name == "hedgehog":
             continue
         log.debug("run %s --help", name)
-        proc = subprocess.run(
-            [name, "--help"],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        try:
+            proc = subprocess.run(
+                [name, "--help"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except FileNotFoundError as exc:
+            raise Error("%s\nHint: poetry install", exc)
         extra_content.append(f"### {name}")
         extra_content.append(f"```\n{proc.stdout}\n```")
 
