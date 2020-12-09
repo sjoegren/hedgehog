@@ -27,11 +27,14 @@ def git_command(*args):
 def select_branch(*, include_remotes=False):
     """Display a menu of git branches and return the selected branch name, or None."""
     log = logging.getLogger(__name__)
-    lines = git_command("branch", "--list", "--no-color", "--verbose").splitlines()
+    args = ["branch", "--list", "--no-color", "--verbose"]
+    if include_remotes:
+        args.append("--all")
+    lines = git_command(*args).splitlines()
     log.debug_obj(lines, "git branch output")
     branches = []
     for line in lines:
-        if (match := re.match(r"..(\S+)", line)) :
+        if (match := re.match(r"..(?:remotes/)?(\S+)", line)) :
             branches.append((line, match[1]))
     log.debug_obj(branches, "menu data")
     menu = TerminalMenu(
