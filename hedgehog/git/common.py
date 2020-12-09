@@ -1,10 +1,15 @@
+import collections
 import logging
 import re
 import subprocess
 
+from typing import Optional
+
 from simple_term_menu import TerminalMenu
 
 from .. import Error, Print
+
+Branch = collections.namedtuple("Branch", "branch, all, index, is_checked_out")
 
 
 def git_command(*args):
@@ -24,7 +29,7 @@ def git_command(*args):
     return proc.stdout
 
 
-def select_branch(*, include_remotes=False):
+def select_branch(*, include_remotes=False, title=None) -> Optional[Branch]:
     """Display a menu of git branches and return the selected branch name, or None."""
     log = logging.getLogger(__name__)
     args = ["branch", "--list", "--no-color", "--verbose"]
@@ -33,21 +38,34 @@ def select_branch(*, include_remotes=False):
     lines = git_command(*args).splitlines()
     log.debug_obj(lines, "git branch output")
     branches = []
-    for line in lines:
-        if (match := re.match(r"..(?:remotes/)?(\S+)", line)) :
-            branches.append((line, match[1]))
+    checked_out_branch = None
+    for i, line in enumerate(lines):
+        if (match := re.match(r"(.).(?:remotes/)?(\S+)", line)) :
+            branches.append((line, match[2]))
+            if match[1] == "*":
+                checked_out_branch = i
     log.debug_obj(branches, "menu data")
     menu = TerminalMenu(
         ("|".join(b) for b in branches),
         preview_command="git log -3 {}",
         cycle_cursor=False,
         preview_size=0.7,
+        show_search_hint=True,
+        title=title,
     )
     index = menu.show()
     if index is None:
         return None
     log.debug("Selected index: %s, branch: %s", index, branches[index])
-    return branches[index][1]
+    return Branch(branches[index][1], branches, index, index == checked_out_branch)
+
+
+def main_branch(branchlist) -> str:
+    """Return the (index, name) of the main branch."""
+    for i, (desc, name) in enumerate(branchlist):
+        if name in ("master", "main"):
+            return i, name
+    raise Error("Cannot find any main branch in given list.")
 
 
 def print_git_command(git_args: list, /, extra=None):

@@ -49,6 +49,7 @@ def main(*, cli_args: str = None):
         preview_command="git show {}",
         cycle_cursor=False,
         preview_size=0.7,
+        show_search_hint=True,
     )
     index = menu.show()
     if index is None:

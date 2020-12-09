@@ -38,7 +38,7 @@ def main(*, cli_args: str = None):
     branch = common.select_branch(include_remotes=args.all)
     if not branch:
         return
-    git_args = ["checkout", branch]
+    git_args = ["checkout", branch.branch]
     common.print_git_command(git_args)
     common.git_command(*git_args)
 
