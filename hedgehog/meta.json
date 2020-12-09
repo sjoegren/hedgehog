@@ -1,5 +1,13 @@
 {
     "scripts": {
+        "git-fixup": {
+            "brief": "git fixup - display a menu with commits to choose from to create a fixup commit.",
+            "description": "git fixup - display a menu with commits to choose from to create a fixup commit."
+        },
+        "git-cob": {
+            "brief": "git cob - display a menu with branches to choose from to checkout.",
+            "description": "git cob - display a menu with branches to choose from to checkout."
+        },
         "hedgehog": {
             "brief": "Provide information about available tools.",
             "description": "Provide information about available tools."
@@ -14,7 +22,7 @@
         }
     },
     "name": "hedgehog",
-    "version": "0.1.2",
+    "version": "0.2.0",
     "description": "Random and somewhat useful tools",
     "repository": "https://github.com/akselsjogren/hedgehog"
 }

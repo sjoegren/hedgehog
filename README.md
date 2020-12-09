@@ -7,6 +7,37 @@ curl -sSL https://raw.githubusercontent.com/akselsjogren/hedgehog/main/install-h
 
 ## Tools
 <!-- following is automatically generated -->
+### git-cob
+```
+usage: git-cob [-h] [-V] [--color | --no-color] [-v] [--debug] [-a]
+
+git cob - display a menu with branches to choose from to checkout.
+
+optional arguments:
+  -h, --help           show this help message and exit
+  -V, --version        show program's version number and exit
+  --color, --no-color
+  -v, --verbose        Increase verbosity level.
+  --debug              Extra debug output.
+  -a, --all            Show branches from remotes too.
+
+```
+### git-fixup
+```
+usage: git-fixup [opts] [git-commit args]
+
+git fixup - display a menu with commits to choose from to create a fixup commit.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -V, --version         show program's version number and exit
+  --color, --no-color
+  -v, --verbose         Increase verbosity level.
+  --debug               Extra debug output.
+  -n MAX_COUNT, --max-count MAX_COUNT
+                        Number of commits to show in menu, default: 10.
+
+```
 ### hhdiff
 ```
 usage: hhdiff [-h] [-V] [--color | --no-color] [-c] [-u] [-m] [-n] [-l LINES]
