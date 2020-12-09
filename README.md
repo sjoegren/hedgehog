@@ -38,6 +38,20 @@ optional arguments:
                         Number of commits to show in menu, default: 10.
 
 ```
+### git-rmb
+```
+usage: git-rmb [-h] [-V] [--color | --no-color] [-v] [--debug]
+
+git rmb - select a branch to remove remote and locally.
+
+optional arguments:
+  -h, --help           show this help message and exit
+  -V, --version        show program's version number and exit
+  --color, --no-color
+  -v, --verbose        Increase verbosity level.
+  --debug              Extra debug output.
+
+```
 ### hhdiff
 ```
 usage: hhdiff [-h] [-V] [--color | --no-color] [-c] [-u] [-m] [-n] [-l LINES]

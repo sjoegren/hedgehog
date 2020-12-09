@@ -11,7 +11,7 @@ from typing import Callable, Union, Tuple
 
 import termcolor
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 CACHE_DIR = pathlib.Path.home() / ".cache/hedgehog"
 TEMP_DIR = pathlib.Path("/var/run/user") / str(os.getuid()) / "hedgehog"
