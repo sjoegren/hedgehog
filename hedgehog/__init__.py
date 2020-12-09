@@ -7,7 +7,7 @@ import pathlib
 import shlex
 import sys
 
-from typing import Callable, Union
+from typing import Callable, Union, Tuple
 
 import termcolor
 
@@ -124,7 +124,10 @@ def _argument_parser(logger: bool, argp_kwargs: dict):
 
 
 def init(
-    hook_func: Callable[[argparse.ArgumentParser, list], argparse.Namespace],
+    hook_func: Callable[
+        [argparse.ArgumentParser, list],
+        Union[argparse.Namespace, Tuple[argparse.Namespace, dict]],
+    ],
     /,
     *,
     arguments: str = None,
@@ -139,9 +142,9 @@ def init(
     Args:
         hook_func: A callable `func(parser, argv, /)` which is passed the
         ArgumentParser instance and argv which should be passed to
-        `parser.parse_args()`. hook_func must return a dict with a mandatory
-        key `args` containing the Namespace object returned by parse_args.
-        Other valid options for the return dict are:
+        `parser.parse_args()`. hook_func must return either the `Namespace`
+        (from parse_args()) or `(Namespace, dict)` where dict can contain extra
+        options such as:
             * log_format: str
             * log_format_date: bool
 
