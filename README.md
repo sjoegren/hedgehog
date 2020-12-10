@@ -1,5 +1,9 @@
 # Random and somewhat useful tools
 
+Requires:
+* Python 3.9+
+* bash
+
 Install in `$HOME/.local/hedgehog`:
 ```console
 curl -sSL https://raw.githubusercontent.com/akselsjogren/hedgehog/main/install-hedgehog.bash | bash

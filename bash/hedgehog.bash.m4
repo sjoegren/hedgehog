@@ -15,7 +15,7 @@ _complete_sshansible() {
 						return
 					fi
 				done
-				COMPREPLY=($(compgen -W "$(sshansible --complete-hosts)" "${COMP_WORDS[$COMP_CWORD]}"))
+				COMPREPLY=($(compgen -W "$(INSTALL_DIR/bin/sshansible --complete-hosts)" "${COMP_WORDS[$COMP_CWORD]}"))
 			fi
 			;;
 	esac
