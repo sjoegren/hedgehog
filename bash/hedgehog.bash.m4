@@ -23,4 +23,25 @@ _complete_sshansible() {
 
 complete -F _complete_sshansible sshansible
 
+# Functions for use with the dirstack program.
+ds() {
+    local out rv
+    if [ -n "$1" ]; then
+        # Must cd first, to honor CDPATH
+        cd "$1" || return
+        INSTALL_DIR/bin/dirstack --add "$PWD"
+        return
+    fi
+    out="$(INSTALL_DIR/bin/dirstack)"
+    rv=$?
+    case $rv in
+        0) cd "$out" ;;  # go to selected dir
+        3) ;;
+        4) echo $out ;;
+        *)
+    esac
+}
+
+complete -o nospace -F _cd ds
+
 export PATH="$PATH:INSTALL_DIR/bin"

@@ -20,6 +20,7 @@ black = "^20.8b1"
 toml = "^0.10.2"
 
 [tool.poetry.scripts]
+dirstack = "hedgehog.dirstack.main:main_wrap"
 git-fixup = "hedgehog.git.fixup:main_wrap"
 git-cob = "hedgehog.git.checkout:main_wrap"
 git-rmb = "hedgehog.git.rmbranch:main_wrap"
