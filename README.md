@@ -11,6 +11,25 @@ curl -sSL https://raw.githubusercontent.com/akselsjogren/hedgehog/main/install-h
 
 ## Tools
 <!-- following is automatically generated -->
+### dirstack
+```
+usage: dirstack [-h] [-V] [--color | --no-color] [-v] [--debug] [--add DIR]
+                [--delete] [--list]
+
+dirstack - work horse for `ds` shell function.
+
+optional arguments:
+  -h, --help           show this help message and exit
+  -V, --version        show program's version number and exit
+  --color, --no-color
+  -v, --verbose        Increase verbosity level.
+  --debug              Extra debug output.
+  --add DIR            Add path to dirstack
+  --delete             Delete the dirstack file.
+  --list               List current dirstack entries sorted on access time on
+                       stdout.
+
+```
 ### git-cob
 ```
 usage: git-cob [-h] [-V] [--color | --no-color] [-v] [--debug] [-a]
