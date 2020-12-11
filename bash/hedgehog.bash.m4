@@ -41,7 +41,6 @@ ds() {
         *)
     esac
 }
-
 complete -o nospace -F _cd ds
 
 export PATH="$PATH:INSTALL_DIR/bin"

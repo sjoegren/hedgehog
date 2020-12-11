@@ -80,6 +80,7 @@ def main(*, cli_args: str = None):
         "[p] pop an entry",
         "[d] delete an entry",
         "[o] delete entries older than...",
+        "[l] last visited directory",
     ]
     menu = functools.partial(TerminalMenu, show_search_hint=True)
     main_menu = menu(menu_entries + options)
@@ -94,13 +95,27 @@ def main(*, cli_args: str = None):
     except IndexError:  # one of the options after stack entries selected
         opt = index - len(ordered_entries)
         option = options[opt]
+
+        if "last visited directory" in option:
+            # Find first entry in list (sorted by visit time desc) that is not CWD
+            for entry in ordered_entries:
+                if entry.path != pathlib.Path.cwd():
+                    stack.add(entry)
+                    print(entry.path)
+                    stack.save()
+                    return
+            else:
+                raise DirstackException("No entry available", retcode=EXIT_NOOP)
+
         kwargs = {}
         if "older than" in option:
             kwargs["title"] = "Delete all entries from selected and older:"
 
+        # Show menu of directories again, without the options
         selected_entry = menu(menu_entries, **kwargs).show()
         if selected_entry is None:
             raise DirstackException("Nothing selected", retcode=EXIT_NOOP)
+
         if "pop an entry" in option:
             entry = stack.pop(ordered_entries[selected_entry].path)
             print(entry.path)
