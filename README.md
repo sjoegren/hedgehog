@@ -129,7 +129,7 @@ optional arguments:
 ```
 usage: sshansible [-h] [-V] [--color | --no-color] [-v] [--debug]
                   [--scp [hostname]] [-c FILE] [--copy-id] [-l] [-L]
-                  [--ssh-config]
+                  [--ssh-config] [--hosts-file]
                   [arg ...]
 
 SSH to hostnames in an ansible-inventory using "ansible_host" address instead
@@ -169,5 +169,6 @@ optional arguments:
   --ssh-config          Re-write host aliases to ssh_config from ansible
                         inventory. Normally this is done automatically on each
                         invocation.
+  --hosts-file          Write ansible hosts to /etc/hosts
 
 ```

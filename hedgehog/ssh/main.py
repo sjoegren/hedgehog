@@ -18,11 +18,14 @@ scp:
 import argparse
 import logging
 import os
+import pathlib
 import queue
 import subprocess
 import sys
 import threading
 import time
+
+from typing import List
 
 import hedgehog
 from . import ansible
@@ -69,10 +72,19 @@ def _init(parser, argv: list, /):
         help="Re-write host aliases to ssh_config from ansible "
         "inventory. Normally this is done automatically on each invocation.",
     )
+    parser.add_argument(
+        "--hosts-file", action="store_true", help="Write ansible hosts to /etc/hosts"
+    )
     parser.add_argument("--dryrun", "--ip", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     if (
-        not (args.complete_hosts or args.last or args.list or args.ssh_config)
+        not (
+            args.complete_hosts
+            or args.last
+            or args.list
+            or args.ssh_config
+            or args.hosts_file
+        )
         and not args.sshargs
     ):
         parser.error("hostname argument or --last is required")
@@ -113,6 +125,11 @@ def main(*, cli_args: str = None):
     elif args.list:
         list_inventory(inventory, cache_file)
         return
+    elif args.hosts_file:
+        handle_hosts_file(
+            [h for h, online in list_inventory(inventory, cache_file) if online]
+        )
+        return
 
     if not hostname:
         hostname = args.scp or args.sshargs[-1]
@@ -140,6 +157,23 @@ def main(*, cli_args: str = None):
         print(host.address)
     else:
         os.execlp(command, *exec_args)
+
+
+def handle_hosts_file(inventory: List[ansible.Host]):
+    hosts_file = pathlib.Path("/etc/hosts")
+    cprint = Print.instance()
+    if (tempname := ansible.write_hosts_file(inventory, hosts_file)) is not None:
+        log.debug(
+            "Hosts were written to temp file %s instead, now run sudo to copy the "
+            "file to %s",
+            tempname,
+            hosts_file,
+        )
+        cprint(f"Copy {tempname} to {hosts_file} via sudo", color="yellow")
+        subprocess.run(
+            ["sudo", "install", "-v", "-b", "--mode=644", tempname, str(hosts_file)],
+            check=True,
+        )
 
 
 def host_status(task_q, result_q):
@@ -177,11 +211,13 @@ def list_inventory(inventory, cache_file):
         lasthost = None
 
     cprint = Print.instance()
+    result = []
     # print hosts as soon as they are ready
     for _ in range(len(threads)):
         # Get the number of results as we've created threads.
         thread, host, status = result_q.get(timeout=5)
         thread.join()
+        result.append((host, status))
         print(
             "{0:<{colwidth}}  {1:<15}  {2:<7}  https://{1}".format(
                 cprint.colored(
@@ -196,6 +232,7 @@ def list_inventory(inventory, cache_file):
             )
         )
     assert threading.active_count() == 1
+    return result
 
 
 def run_remote_command(remote_cmd_file, hostname, address, exec_args):
@@ -252,5 +289,6 @@ def main_wrap():
     try:
         main()
     except Error as exc:
+        logging.getLogger(__name__).debug("", exc_info=True)
         Print.instance()(f"Error: {exc}", color="red")
         sys.exit(exc.retcode)

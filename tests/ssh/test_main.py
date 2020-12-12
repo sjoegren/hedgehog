@@ -1,9 +1,11 @@
+import pathlib
 import pytest
+import shlex
 
-from unittest.mock import Mock
+from unittest.mock import Mock, sentinel
 
 import hedgehog
-from hedgehog.ssh import main
+from hedgehog.ssh import main, ansible
 
 
 @pytest.fixture
@@ -43,6 +45,36 @@ def test_main_ssh_last(mock_exec, cache_file):
     main.main(cli_args="--last")
     assert mock_exec.called_once_with(
         "ssh", "ssh", "-o", "Hostname=198.51.0.1", "remote.example.com"
+    )
+
+
+def test_main_hosts_file(monkeypatch):
+    hosts = [
+        (ansible.Host("quebec", "192.0.2.1"), True),
+        (ansible.Host("romeo", "192.0.2.2"), False),
+        (ansible.Host("sierra", "192.0.2.3"), True),
+    ]
+    mock_list = Mock(return_value=hosts)
+    monkeypatch.setattr(main, "list_inventory", mock_list)
+    mock_write = Mock(return_value=None)
+    monkeypatch.setattr(ansible, "write_hosts_file", mock_write)
+    main.main(cli_args="--hosts-file")
+    mock_write.assert_called_once_with(
+        [hosts[0][0], hosts[2][0]], pathlib.Path("/etc/hosts")
+    )
+
+
+def test_handle_hosts_file_runs_sudo_if_tempfile(monkeypatch, tmp_path):
+    temp = tmp_path / "tmpfile"
+    mock_write = Mock(return_value=str(temp))
+    mock_run = Mock()
+    monkeypatch.setattr(ansible, "write_hosts_file", mock_write)
+    monkeypatch.setattr("subprocess.run", mock_run)
+    main.handle_hosts_file(sentinel.inventory)
+    mock_write.assert_called_once_with(sentinel.inventory, pathlib.Path("/etc/hosts"))
+    assert (
+        shlex.join(mock_run.call_args.args[0])
+        == f"sudo install -v -b --mode=644 {str(temp)} /etc/hosts"
     )
 
 
