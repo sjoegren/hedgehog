@@ -20,6 +20,21 @@ def _init(parser, argv: list, /):
         help="Number of commits to show in menu, default: %(default)s.",
         default="10",
     )
+    parser.add_argument(
+        "-s",
+        "--squash",
+        action="store_const",
+        dest="commit_type",
+        default="--fixup",
+        const="--squash",
+        help="git commit --squash instead of --fixup",
+    )
+    parser.add_argument(
+        "-p",
+        "--print-commit",
+        action="store_true",
+        help="Print commit id instead of issuing 'git commit --fixup'",
+    )
     args, remainder = parser.parse_known_args(argv)
     setattr(args, "remainder", remainder)
     return args
@@ -46,19 +61,24 @@ def main(*, cli_args: str = None):
     log.debug_obj(commits, "Commits")
     menu = TerminalMenu(
         ("|".join(c) for c in commits),
-        preview_command="git show {}",
+        preview_command="git log -1 {}",
         cycle_cursor=False,
-        preview_size=0.7,
+        preview_size=0.4,
         show_search_hint=True,
     )
     index = menu.show()
     if index is None:
         return
     log.debug("Selected index: %s, commit: %s", index, commits[index])
+
+    if args.print_commit:
+        print(commits[index][1])
+        return
+
     git_args = [
         "commit",
         *args.remainder,
-        "--fixup",
+        args.commit_type,
         commits[index][1],
     ]
     common.print_git_command(git_args, f"   # ({commits[index][0]})")

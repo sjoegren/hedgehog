@@ -61,6 +61,9 @@ optional arguments:
   --debug               Extra debug output.
   -n MAX_COUNT, --max-count MAX_COUNT
                         Number of commits to show in menu, default: 10.
+  -s, --squash          git commit --squash instead of --fixup
+  -p, --print-commit    Print commit id instead of issuing 'git commit
+                        --fixup'
 
 ```
 ### git-getbranch
