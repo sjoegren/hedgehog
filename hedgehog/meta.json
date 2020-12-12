@@ -1,8 +1,8 @@
 {
     "scripts": {
         "dirstack": {
-            "brief": "dirstack - work horse for `ds` shell function.",
-            "description": "dirstack - work horse for `ds` shell function."
+            "brief": "dirstack - keep a list of recently visited directories to choose from, invoke with `ds` shell function.",
+            "description": "dirstack - keep a list of recently visited directories to choose from, invoke\nwith `ds` shell function."
         },
         "git-fixup": {
             "brief": "git fixup - display a menu with commits to choose from to create a fixup commit.",

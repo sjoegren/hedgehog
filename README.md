@@ -16,7 +16,8 @@ curl -sSL https://raw.githubusercontent.com/akselsjogren/hedgehog/main/install-h
 usage: dirstack [-h] [-V] [--color | --no-color] [-v] [--debug] [--add DIR]
                 [--delete] [--list]
 
-dirstack - work horse for `ds` shell function.
+dirstack - keep a list of recently visited directories to choose from, invoke
+with `ds` shell function.
 
 optional arguments:
   -h, --help           show this help message and exit

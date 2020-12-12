@@ -1,8 +1,8 @@
 """
-dirstack - work horse for `ds` shell function.
+dirstack - keep a list of recently visited directories to choose from, invoke
+with `ds` shell function.
 """
 import argparse
-import collections
 import functools
 import logging
 import pathlib
@@ -14,12 +14,9 @@ import hedgehog
 from .dirstack import Dirstack
 from .. import Error, Print
 
-DIRSTACK = pathlib.Path.home() / ".cache" / "dirstack.txt"
 log = None
 EXIT_NOOP = 3
 EXIT_DELETED = 4
-
-Entry = collections.namedtuple("Entry", "time, path")
 
 
 class DirstackException(Error):
@@ -74,7 +71,8 @@ def main(*, cli_args: str = None):
 
     ordered_entries = stack.sorted()
     menu_entries = [
-        f"[{i + 1}] {e.time}: {e.path}" for i, e in enumerate(ordered_entries)
+        f"[{i + 1}] {e.time.isoformat(sep=' ', timespec='seconds')}  {e.path}"
+        for i, e in enumerate(ordered_entries)
     ]
     options = [
         "[p] pop an entry",
