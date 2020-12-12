@@ -32,7 +32,7 @@ optional arguments:
 ```
 ### git-cob
 ```
-usage: git-cob [-h] [-V] [--color | --no-color] [-v] [--debug] [-a]
+usage: git-cob [-h] [-V] [--color | --no-color] [-v] [--debug] [-a] [-P]
 
 git cob - display a menu with branches to choose from to checkout.
 
@@ -43,6 +43,7 @@ optional arguments:
   -v, --verbose        Increase verbosity level.
   --debug              Extra debug output.
   -a, --all            Show branches from remotes too.
+  -P, --no-preview     Don't show preview window in menu with latest commits.
 
 ```
 ### git-fixup
@@ -59,6 +60,22 @@ optional arguments:
   --debug               Extra debug output.
   -n MAX_COUNT, --max-count MAX_COUNT
                         Number of commits to show in menu, default: 10.
+
+```
+### git-getbranch
+```
+usage: git-getbranch [-h] [-V] [--color | --no-color] [-v] [--debug] [-a] [-P]
+
+git getbranch - select a branch from a menu and print it.
+
+optional arguments:
+  -h, --help           show this help message and exit
+  -V, --version        show program's version number and exit
+  --color, --no-color
+  -v, --verbose        Increase verbosity level.
+  --debug              Extra debug output.
+  -a, --all            Show branches from remotes too.
+  -P, --no-preview     Don't show preview window in menu with latest commits.
 
 ```
 ### git-rmb

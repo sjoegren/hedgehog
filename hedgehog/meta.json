@@ -9,8 +9,12 @@
             "description": "git fixup - display a menu with commits to choose from to create a fixup commit."
         },
         "git-cob": {
-            "brief": "git cob - display a menu with branches to choose from to checkout.",
-            "description": "git cob - display a menu with branches to choose from to checkout."
+            "brief": "Display a menu of branches from the current git repo",
+            "description": "Display a menu of branches from the current git repo.\n\n* git cob       - checkout selected branch.\n* git getbranch - print name of selected branch."
+        },
+        "git-getbranch": {
+            "brief": "Display a menu of branches from the current git repo",
+            "description": "Display a menu of branches from the current git repo.\n\n* git cob       - checkout selected branch.\n* git getbranch - print name of selected branch."
         },
         "git-rmb": {
             "brief": "git rmb - select a branch to remove remote and locally.",
@@ -30,7 +34,7 @@
         }
     },
     "name": "hedgehog",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "Random and somewhat useful tools",
     "repository": "https://github.com/akselsjogren/hedgehog"
 }

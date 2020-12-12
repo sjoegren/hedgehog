@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hedgehog"
-version = "0.2.2"
+version = "0.2.3"
 description = "Random and somewhat useful tools"
 authors = ["Aksel Sjögren <akselsjogren@users.noreply.github.com>"]
 readme = "README.md"
@@ -22,7 +22,8 @@ toml = "^0.10.2"
 [tool.poetry.scripts]
 dirstack = "hedgehog.dirstack.main:main_wrap"
 git-fixup = "hedgehog.git.fixup:main_wrap"
-git-cob = "hedgehog.git.checkout:main_wrap"
+git-cob = "hedgehog.git.branch:cob_wrap"
+git-getbranch = "hedgehog.git.branch:getbranch_wrap"
 git-rmb = "hedgehog.git.rmbranch:main_wrap"
 hedgehog = "hedgehog.help:main"
 hhdiff = "hedgehog.diff.__main__:main"

@@ -29,7 +29,9 @@ def git_command(*args):
     return proc.stdout
 
 
-def select_branch(*, include_remotes=False, title=None) -> Optional[Branch]:
+def select_branch(
+    *, include_remotes=False, title=None, preview=True
+) -> Optional[Branch]:
     """Display a menu of git branches and return the selected branch name, or None."""
     log = logging.getLogger(__name__)
     args = ["branch", "--list", "--no-color", "--verbose"]
@@ -45,13 +47,20 @@ def select_branch(*, include_remotes=False, title=None) -> Optional[Branch]:
             if match[1] == "*":
                 checked_out_branch = i
     log.debug_obj(branches, "menu data")
+
+    extra_args = {}
+    if preview:
+        extra_args = dict(
+            preview_command="git log -3 {}",
+            preview_size=0.7,
+        )
+
     menu = TerminalMenu(
         ("|".join(b) for b in branches),
-        preview_command="git log -3 {}",
         cycle_cursor=False,
-        preview_size=0.7,
         show_search_hint=True,
         title=title,
+        **extra_args,
     )
     index = menu.show()
     if index is None:
