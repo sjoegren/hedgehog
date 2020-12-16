@@ -14,12 +14,6 @@ log = None
 
 
 def _init(parser, argv: list, /):
-    # parser.add_argument(
-    #     "-a",
-    #     "--all",
-    #     action="store_true",
-    #     help="Show branches from remotes too.",
-    # )
     parser.add_argument("--dryrun", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
     return args
@@ -79,7 +73,6 @@ def main(*, cli_args: str = None):
 
 
 def main_wrap():
-    """Called from script created at package install."""
     try:
         main()
     except Error as exc:

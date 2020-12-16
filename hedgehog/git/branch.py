@@ -71,12 +71,12 @@ def getbranch(*, cli_args: str = None):
 
 
 def cob_wrap():
-    """Called from script created at package install."""
+    """Checkout selected branch."""
     _main_wrap(cob)
 
 
 def getbranch_wrap():
-    """Called from script created at package install."""
+    """Print name of selected branch."""
     _main_wrap(getbranch)
 
 

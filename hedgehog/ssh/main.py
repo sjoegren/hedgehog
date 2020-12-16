@@ -285,7 +285,6 @@ def run_remote_command(remote_cmd_file, hostname, address, exec_args):
 
 
 def main_wrap():
-    """Called from script created at package install."""
     try:
         main()
     except Error as exc:

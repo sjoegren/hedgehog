@@ -141,7 +141,6 @@ def main(*, cli_args: str = None):
 
 
 def main_wrap():
-    """Called from script created at package install."""
     try:
         main()
     except DirstackException as exc:
