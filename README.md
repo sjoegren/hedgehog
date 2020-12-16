@@ -51,7 +51,7 @@ optional arguments:
 ```
 usage: git-fixup [opts] [git-commit args]
 
-git fixup - display a menu with commits to choose from to create a fixup commit.
+Display a menu with commits to choose from to create a fixup commit.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -62,8 +62,6 @@ optional arguments:
   -n MAX_COUNT, --max-count MAX_COUNT
                         Number of commits to show in menu, default: 10.
   -s, --squash          git commit --squash instead of --fixup
-  -p, --print-commit    Print commit id instead of issuing 'git commit
-                        --fixup'
 
 ```
 ### git-getbranch
@@ -80,6 +78,24 @@ optional arguments:
   --debug              Extra debug output.
   -a, --all            Show branches from remotes too.
   -P, --no-preview     Don't show preview window in menu with latest commits.
+
+```
+### git-pv
+```
+usage: git-pv [opts] [<revision range>] [[--] <path>...]
+
+Preview commits and show or print selected commit.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -V, --version         show program's version number and exit
+  --color, --no-color
+  -v, --verbose         Increase verbosity level.
+  --debug               Extra debug output.
+  -n MAX_COUNT, --max-count MAX_COUNT
+                        Number of commits to show in menu, default: 20.
+  -l, --log-preview     Show preview of git log instead of patches.
+  -p, --print           Print selected commit id instead of showing the patch.
 
 ```
 ### git-rmb
