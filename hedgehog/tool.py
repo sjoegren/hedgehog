@@ -118,9 +118,10 @@ def get_metadata(settings, args):
     for key in ("name", "version", "description", "repository"):
         meta[key] = settings["tool"]["poetry"][key]
     for name, path in settings["tool"]["poetry"]["scripts"].items():
-        modpath = path.split(":")[0]
+        modpath, funcname = path.split(":")
         module = importlib.import_module(modpath)
-        description = module.__doc__.strip()
+        # Use docstring from script function, if defined, or module docstring.
+        description = (getattr(module, funcname).__doc__ or module.__doc__).strip()
         brief = re.split(r'\.[\s"]', description, maxsplit=1)[0].replace("\n", " ")
         log.info("%s: %s", name, brief)
         meta["scripts"][name] = {"brief": brief, "description": description}

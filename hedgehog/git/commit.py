@@ -4,6 +4,7 @@ Display a menu of commits from the currently checked out branch.
 * git fixup - display a menu with commits to choose from to create a fixup commit.
 * git pv    - Preview commits and print selected commit id.
 """
+import functools
 import logging
 import os
 import subprocess
@@ -40,14 +41,14 @@ def _init_fixup(parser, argv: list, /):
     return args
 
 
-def fixup(*, cli_args: str = None):
+def fixup(*, cli_args: str = None, doc: str = None):
     global log
     args = hedgehog.init(
         _init_fixup,
         arguments=cli_args,
         logger=True,
         argp_kwargs=dict(
-            description=__doc__, usage="%(prog)s [opts] [git-commit args]"
+            description=doc, usage="%(prog)s [opts] [git-commit args]"
         ),
     )
     log = logging.getLogger(args.prog_name)
@@ -105,7 +106,7 @@ def _init_preview(parser, argv: list, /):
     return args
 
 
-def preview(*, cli_args: str = None):
+def preview(*, cli_args: str = None, doc: str = ''):
     """Select and print commit, show preview of "git show" in full screen."""
     global log
     args = hedgehog.init(
@@ -113,7 +114,7 @@ def preview(*, cli_args: str = None):
         arguments=cli_args,
         logger=True,
         argp_kwargs=dict(
-            description=__doc__,
+            description=doc,
             usage="%(prog)s [opts] [<revision range>] [[--] <path>...]",
         ),
     )
@@ -163,13 +164,13 @@ def preview(*, cli_args: str = None):
 
 
 def fixup_wrap():
-    """Called from script created at package install."""
-    _main_wrap(fixup)
+    """Display a menu with commits to choose from to create a fixup commit."""
+    _main_wrap(functools.partial(fixup, doc=fixup_wrap.__doc__))
 
 
 def preview_wrap():
-    """Called from script created at package install."""
-    _main_wrap(preview)
+    """Preview commits and show or print selected commit."""
+    _main_wrap(functools.partial(preview, doc=preview_wrap.__doc__))
 
 
 def _main_wrap(main_func):
