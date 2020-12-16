@@ -47,9 +47,7 @@ def fixup(*, cli_args: str = None, doc: str = None):
         _init_fixup,
         arguments=cli_args,
         logger=True,
-        argp_kwargs=dict(
-            description=doc, usage="%(prog)s [opts] [git-commit args]"
-        ),
+        argp_kwargs=dict(description=doc, usage="%(prog)s [opts] [git-commit args]"),
     )
     log = logging.getLogger(args.prog_name)
     log.debug(args)
@@ -106,7 +104,7 @@ def _init_preview(parser, argv: list, /):
     return args
 
 
-def preview(*, cli_args: str = None, doc: str = ''):
+def preview(*, cli_args: str = None, doc: str = ""):
     """Select and print commit, show preview of "git show" in full screen."""
     global log
     args = hedgehog.init(
