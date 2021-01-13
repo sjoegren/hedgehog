@@ -34,7 +34,7 @@ def get_inventory(*, inventory=None) -> Dict[str, Host]:
     return hosts
 
 
-def write_ssh_config(ssh_config: str, inventory: Iterable[Host], /):
+def write_ssh_config(ssh_config: pathlib.Path, inventory: Iterable[Host], /):
     path = pathlib.Path(ssh_config).expanduser()
     lines = []
     for host in inventory:

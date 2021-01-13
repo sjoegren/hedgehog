@@ -18,7 +18,7 @@ def test_write_ssh_config(tmp_path):
         ansible.Host("golf-el6", "198.51.100.102"),
     ]
     config = tmp_path / "ssh_config"
-    ansible.write_ssh_config(str(config), inventory)
+    ansible.write_ssh_config(config, inventory)
     expected = textwrap.dedent(
         """\
         Host foxtrot
