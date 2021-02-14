@@ -13,6 +13,7 @@ from typing import Callable, Union, Tuple
 import termcolor
 
 CACHE_DIR = pathlib.Path.home() / ".cache/hedgehog"
+CONFIG_DIR = pathlib.Path.home() / ".config/hedgehog"
 TEMP_DIR = pathlib.Path("/var/run/user") / str(os.getuid()) / "hedgehog"
 META_FILE = importlib.resources.files(__package__) / "meta.json"
 
@@ -162,6 +163,7 @@ def init(
     argv = sys.argv[1:] if arguments is None else shlex.split(arguments)
     parser = _argument_parser(logger, argp_kwargs)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     TEMP_DIR.mkdir(exist_ok=True)
     args = hook_func(parser, argv)
     if isinstance(args, tuple):

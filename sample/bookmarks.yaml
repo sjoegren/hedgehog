@@ -1,0 +1,5 @@
+- path: /proj/the/interesting/directory
+  desc: Belongs to project A
+
+# Glob patterns are supported, all matching directories are dynamically added as bookmarks.
+- path: ~/repos/*

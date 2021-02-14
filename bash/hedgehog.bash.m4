@@ -43,4 +43,18 @@ ds() {
 }
 complete -o nospace -F _cd ds
 
+# Navigate to bookmarked directories, using fzfdirs.
+# usage: cdg [fzfdirs options]
+cdg() {
+    local dir
+    # Remove possible trailing ' (description of bookmark)'
+    if [ -n "$1" ]; then
+        INSTALL_DIR/bin/fzfdirs "$@"
+        return
+    fi
+    dir=$(INSTALL_DIR/bin/fzfdirs | fzf-tmux -- --reverse | sed -e 's/\s*(.*//')
+    cd "$dir" || return
+}
+
+export -f cdg ds
 export PATH="$PATH:INSTALL_DIR/bin"

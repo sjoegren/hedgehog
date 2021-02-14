@@ -12,6 +12,7 @@ exclude = ["hedgehog/tool.py"]
 python = "^3.9"
 termcolor = "^1.1.0"
 simple-term-menu = "^0.10.4"
+PyYAML = "^5.4.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -29,6 +30,7 @@ git-rmb = "hedgehog.git.rmbranch:main_wrap"
 hedgehog = "hedgehog.help:main"
 hhdiff = "hedgehog.diff.__main__:main"
 sshansible = "hedgehog.ssh.main:main_wrap"
+fzfdirs = "hedgehog.fzfdirs.main:main_wrap"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
