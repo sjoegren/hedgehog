@@ -31,6 +31,28 @@ optional arguments:
                        stdout.
 
 ```
+### fzfdirs
+```
+usage: fzfdirs [-h] [-V] [--color | --no-color] [-v] [--debug] [--file FILE]
+               [-e] [--bookmark DIR]
+
+fzfdirs - print bookmarked directories to feed to fzf.
+
+Shell function `cdg` opens fzf with the list of bookmarks and cd to the selected path.
+`cdg -e` to open bookmarks file in $EDITOR.
+
+optional arguments:
+  -h, --help           show this help message and exit
+  -V, --version        show program's version number and exit
+  --color, --no-color
+  -v, --verbose        Increase verbosity level.
+  --debug              Extra debug output.
+  --file FILE          Bookmarks file (default:
+                       /home/aksel/.config/hedgehog/bookmarks.yaml)
+  -e, --edit           Edit bookmarks file
+  --bookmark DIR       Add bookmark
+
+```
 ### git-cob
 ```
 usage: git-cob [-h] [-V] [--color | --no-color] [-v] [--debug] [-a] [-P]

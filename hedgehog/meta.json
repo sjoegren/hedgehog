@@ -35,10 +35,14 @@
         "sshansible": {
             "brief": "SSH to hostnames in an ansible-inventory using \"ansible_host\" address instead of name resolution",
             "description": "SSH to hostnames in an ansible-inventory using \"ansible_host\" address instead\nof name resolution.\n\nGiven an inventory file like this:\n\n    [buildslaves]\n    foo     ansible_host=192.0.2.1\n\nRunning 'sshansible.py -- -v foo', will exec the command:\n  ssh -o Hostname=192.0.2.1 -v foo\n\nThat way any config in 'ssh_config' for host 'foo' will still be honored.\n\nscp:\n    sshansible.py --scp bar -- /etc/foo.conf bar:/tmp"
+        },
+        "fzfdirs": {
+            "brief": "fzfdirs - print bookmarked directories to feed to fzf",
+            "description": "fzfdirs - print bookmarked directories to feed to fzf.\n\nShell function `cdg` opens fzf with the list of bookmarks and cd to the selected path.\n`cdg -e` to open bookmarks file in $EDITOR."
         }
     },
     "name": "hedgehog",
-    "version": "0.2.5",
+    "version": "0.3.0",
     "description": "Random and somewhat useful tools",
     "repository": "https://github.com/akselsjogren/hedgehog"
 }
