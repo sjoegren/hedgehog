@@ -133,5 +133,6 @@ if [ -n "$BASH_DIR" ]; then
     done
 fi
 
-version=$($ENV_PYTHON -m hedgehog)
+hash -r
+version=$(hedgehog --version | awk '$1 == "hedgehog" { print $2 }')
 info "Successfully installed version $version. Make sure '$INSTALL_DIR/bin' is in PATH."

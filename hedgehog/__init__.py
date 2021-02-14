@@ -1,4 +1,5 @@
 import argparse
+import importlib.metadata
 import importlib.resources
 import json
 import logging
@@ -10,8 +11,6 @@ import sys
 from typing import Callable, Union, Tuple
 
 import termcolor
-
-__version__ = "0.2.5"
 
 CACHE_DIR = pathlib.Path.home() / ".cache/hedgehog"
 TEMP_DIR = pathlib.Path("/var/run/user") / str(os.getuid()) / "hedgehog"
@@ -98,12 +97,15 @@ def _argument_parser(logger: bool, argp_kwargs: dict):
     """Initialize an ArgumentParser with some default arguments."""
     argp_kwargs.setdefault("formatter_class", argparse.RawDescriptionHelpFormatter)
     par = argparse.ArgumentParser(**argp_kwargs)
-    py_version = ".".join((str(x) for x in sys.version_info[:3]))
     par.add_argument(
         "-V",
         "--version",
         action="version",
-        version=f"%(prog)s {__version__}\nPython: {py_version} from {sys.exec_prefix}",
+        version="%(prog)s {}\nPython: {} from {}".format(
+            importlib.metadata.version(__package__),
+            ".".join((str(x) for x in sys.version_info[:3])),
+            sys.exec_prefix,
+        ),
     )
     par.add_argument(
         "--color",

@@ -1,15 +1,9 @@
 import logging
 import pytest
+import re
 import subprocess
 
 import hedgehog
-
-
-def test_run_package_as_module_prints_version():
-    proc = subprocess.run(
-        ["python", "-m", "hedgehog"], check=True, capture_output=True, text=True
-    )
-    assert proc.stdout.strip() == hedgehog.__version__
 
 
 @pytest.mark.parametrize(
@@ -17,6 +11,9 @@ def test_run_package_as_module_prints_version():
     [
         "hhdiff",
         "sshansible",
+        "dirstack",
+        "git-rmb",
+        "hedgehog",
     ],
 )
 def test_installed_scripts(name):
@@ -24,8 +21,7 @@ def test_installed_scripts(name):
     proc = subprocess.run(
         [name, "--version"], check=True, capture_output=True, text=True
     )
-    assert name in proc.stdout
-    assert hedgehog.__version__ in proc.stdout
+    assert re.search(rf"^{name} \d+\.\d+\.\d+", proc.stdout, re.M)
 
 
 @pytest.mark.parametrize(

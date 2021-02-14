@@ -72,7 +72,6 @@ def main(*, cli_args: str = None):
     meta = get_metadata(settings, args)
     write_package_metadata(meta, args)
     write_readme(meta, settings["tool"]["poetry"]["readme"], args)
-    update_package_version(meta, args)
 
     if fail_dirty:
         raise Error(
@@ -165,20 +164,6 @@ def write_package_metadata(meta, args):
         with META_FILE.open("w") as metafile:
             json.dump(meta, metafile, indent=4)
         log.info("Wrote back changes to %s", META_FILE)
-
-
-def update_package_version(meta, args):
-    """Update __version__ in the main package."""
-    pkgfile = pathlib.Path(hedgehog.__loader__.path)
-    data = pkgfile.read_text()
-    regex = re.compile(r'^(__version__ = )"(.+)"$', flags=re.M)
-    old_version = regex.search(data).group(2)
-    new, changes = regex.subn(rf'\1"{meta["version"]}"', data, count=1)
-    if changes:
-        log.info("Changed version %r -> %r", old_version, meta["version"])
-        if not args.dryrun:
-            pkgfile.write_text(new)
-            log.info("Wrote back %d changes to %s", changes, pkgfile)
 
 
 def repo_is_clean() -> bool:
