@@ -52,13 +52,13 @@ def test_write_hosts_file_empty_file(tmp_path):
     ]
     hosts = tmp_path / "hosts"
     hosts.write_text("127.0.0.1 localhost")
-    ansible.write_hosts_file(inventory, hosts)
+    ansible.write_hosts_file(inventory, hosts, "bar")
     assert hosts.read_text() == textwrap.dedent(
         """\
         127.0.0.1 localhost
         # --- hedgehog managed start ---
-        198.51.100.101 foxtrot
-        192.0.2.42 golf
+        198.51.100.101 foxtrot foxtrot.bar
+        192.0.2.42 golf golf.bar
         # --- hedgehog managed end ---
         """
     )
@@ -83,15 +83,15 @@ def test_write_hosts_file_update_existing(tmp_path):
         """
         )
     )
-    ansible.write_hosts_file(inventory, hosts)
+    ansible.write_hosts_file(inventory, hosts, "foo.bar")
     assert hosts.read_text() == textwrap.dedent(
         """\
         127.0.0.1 localhost
         ::1       localhost
         # keep this
         # --- hedgehog managed start ---
-        198.51.100.101 foxtrot
-        192.0.2.42 golf
+        198.51.100.101 foxtrot foxtrot.foo.bar
+        192.0.2.42 golf golf.foo.bar
         # --- hedgehog managed end ---
         198.51.100.200 hotel
         """

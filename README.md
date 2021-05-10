@@ -166,8 +166,8 @@ optional arguments:
 ### sshansible
 ```
 usage: sshansible [-h] [-V] [--color | --no-color] [-v] [--debug]
-                  [--scp [hostname]] [-c FILE] [--copy-id] [-l] [-L]
-                  [--ssh-config] [--hosts-file]
+                  [--config CONFIG] [--scp [hostname]] [-c FILE] [--copy-id]
+                  [-l] [-L] [--ssh-config] [--hosts-file]
                   [arg ...]
 
 SSH to hostnames in an ansible-inventory using "ansible_host" address instead
@@ -196,6 +196,8 @@ optional arguments:
   --color, --no-color
   -v, --verbose         Increase verbosity level.
   --debug               Extra debug output.
+  --config CONFIG       Config file (default:
+                        /home/aksel/.config/hedgehog/ssh.yaml)
   --scp [hostname]      Run scp instead of ssh, if used together with -l no
                         hostname is required, leave host empty is target spec.
   -c FILE, --remote-cmd FILE

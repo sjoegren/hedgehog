@@ -1,6 +1,7 @@
 import pathlib
 import pytest
 import shlex
+import textwrap
 
 from unittest.mock import Mock, sentinel
 
@@ -22,6 +23,19 @@ def cache_file(tmp_path):
     yield cache_file
     if cache_file.exists():
         cache_file.unlink()
+
+
+@pytest.fixture(autouse=True)
+def config_file(tmp_path):
+    conf = tmp_path / "ssh.yaml"
+    conf.write_text(
+        textwrap.dedent(
+            """\
+            ---
+            domain_name: example.com
+            """
+        )
+    )
 
 
 def test_main_complete_hosts(capsys):
@@ -60,7 +74,7 @@ def test_main_hosts_file(monkeypatch):
     monkeypatch.setattr(ansible, "write_hosts_file", mock_write)
     main.main(cli_args="--hosts-file")
     mock_write.assert_called_once_with(
-        [hosts[0][0], hosts[2][0]], pathlib.Path("/etc/hosts")
+        [hosts[0][0], hosts[2][0]], pathlib.Path("/etc/hosts"), "example.com"
     )
 
 
@@ -70,8 +84,10 @@ def test_handle_hosts_file_runs_sudo_if_tempfile(monkeypatch, tmp_path):
     mock_run = Mock()
     monkeypatch.setattr(ansible, "write_hosts_file", mock_write)
     monkeypatch.setattr("subprocess.run", mock_run)
-    main.handle_hosts_file(sentinel.inventory)
-    mock_write.assert_called_once_with(sentinel.inventory, pathlib.Path("/etc/hosts"))
+    main.handle_hosts_file(sentinel.inventory, "example.com")
+    mock_write.assert_called_once_with(
+        sentinel.inventory, pathlib.Path("/etc/hosts"), "example.com"
+    )
     assert (
         shlex.join(mock_run.call_args.args[0])
         == f"sudo install -v -b --mode=644 {str(temp)} /etc/hosts"

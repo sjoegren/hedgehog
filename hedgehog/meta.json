@@ -42,7 +42,7 @@
         }
     },
     "name": "hedgehog",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "Random and somewhat useful tools",
     "repository": "https://github.com/akselsjogren/hedgehog"
 }

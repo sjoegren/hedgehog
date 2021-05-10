@@ -59,14 +59,17 @@ def write_ssh_config(ssh_config: pathlib.Path, inventory: Iterable[Host], /):
     path.write_text("\n".join(lines))
 
 
-def write_hosts_file(inventory: List[Host], hosts: pathlib.Path):
+def write_hosts_file(inventory: List[Host], hosts: pathlib.Path, domain: str = None):
     """Write host/address pairs to /etc/hosts from ansible inventory."""
     log = logging.getLogger(__name__)
     delimiters = (
         "# --- hedgehog managed start ---",
         "# --- hedgehog managed end ---",
     )
-    our_lines = [f"{h.address} {h.name}" for h in inventory]
+    if domain:
+        our_lines = [f"{h.address} {h.name} {h.name}.{domain}" for h in inventory]
+    else:
+        our_lines = [f"{h.address} {h.name}" for h in inventory]
     if not our_lines:
         log.warning("Inventory seems empty, not writing anything.")
         return

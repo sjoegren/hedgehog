@@ -27,6 +27,8 @@ import time
 
 from typing import List
 
+import yaml
+
 import hedgehog
 from . import ansible
 from .. import Error, Print
@@ -35,6 +37,11 @@ log = None
 
 
 def _init(parser, argv: list, /):
+    parser.add_argument(
+        "--config",
+        default=str(hedgehog.CONFIG_DIR / "ssh.yaml"),
+        help="Config file (default: %(default)s)",
+    )
     parser.add_argument("--complete-hosts", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument(
         "sshargs",
@@ -105,6 +112,10 @@ def main(*, cli_args: str = None):
     hostname = None
     inventory = ansible.get_inventory(inventory=os.getenv("ANSIBLE_INVENTORY"))
 
+    config_file = pathlib.Path(args.config).resolve()
+    config = yaml.safe_load(config_file.read_bytes())
+    append_host_domain_name = config["domain_name"]
+
     ssh_config = hedgehog.TEMP_DIR / "ssh_config"
     if inventory and (args.ssh_config or not ssh_config.exists()):
         log.info("Write inventory of %d hosts to %s", len(inventory), ssh_config)
@@ -127,7 +138,8 @@ def main(*, cli_args: str = None):
         return
     elif args.hosts_file:
         handle_hosts_file(
-            [h for h, online in list_inventory(inventory, cache_file) if online]
+            [h for h, online in list_inventory(inventory, cache_file) if online],
+            append_host_domain_name,
         )
         return
 
@@ -159,10 +171,12 @@ def main(*, cli_args: str = None):
         os.execlp(command, *exec_args)
 
 
-def handle_hosts_file(inventory: List[ansible.Host]):
+def handle_hosts_file(inventory: List[ansible.Host], append_domain: str):
     hosts_file = pathlib.Path("/etc/hosts")
     cprint = Print.instance()
-    if (tempname := ansible.write_hosts_file(inventory, hosts_file)) is not None:
+    if (
+        tempname := ansible.write_hosts_file(inventory, hosts_file, append_domain)
+    ) is not None:
         log.debug(
             "Hosts were written to temp file %s instead, now run sudo to copy the "
             "file to %s",
