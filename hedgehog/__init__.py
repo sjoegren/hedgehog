@@ -14,7 +14,7 @@ import termcolor
 
 CACHE_DIR = pathlib.Path.home() / ".cache/hedgehog"
 CONFIG_DIR = pathlib.Path.home() / ".config/hedgehog"
-TEMP_DIR = pathlib.Path("/var/run/user") / str(os.getuid()) / "hedgehog"
+TEMP_DIR = pathlib.Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp")) / "hedgehog"
 META_FILE = importlib.resources.files(__package__) / "meta.json"
 
 
