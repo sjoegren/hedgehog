@@ -14,6 +14,39 @@ log = logging.getLogger(__name__)
 HOME = os.path.expanduser("~") + "/"
 
 
+class RecentlyUsed:
+    """
+    List of recently used paths stored in a cache file.
+    The most recently used path is first in the list.
+    """
+
+    store_paths = 10
+
+    def __init__(self, path):
+        self._file = pathlib.Path(path).resolve()
+        self.paths = []
+        if self._file.exists():
+            self.paths = yaml.safe_load(self._file.read_bytes())
+            log.info(
+                "Read %d recently used paths from %s",
+                len(self.paths),
+                self._file,
+            )
+        log.debug("Recent paths: %s", self.paths)
+
+    def add(self, path):
+        """Add path to top of recently used list and write file."""
+        try:
+            self.paths.remove(path)
+        except ValueError:
+            pass
+        self.paths.insert(0, path)
+        self.paths = self.paths[: self.store_paths]
+        with self._file.open("w") as fp:
+            yaml.dump(self.paths, fp)
+        log.debug("Wrote paths to %s: %s", self._file, self.paths)
+
+
 class Bookmarks:
     def __init__(self, path):
         self._file = pathlib.Path(path).resolve()
@@ -39,10 +72,16 @@ class Bookmarks:
     def __len__(self):
         return len(self._bookmarks)
 
-    def formatted(self):
-        for bm in sorted(self._bookmarks):
+    def sorted_formatted(self, recently_used: Optional[RecentlyUsed] = None):
+        bookmarks = sorted(self._bookmarks)
+        indexes = {bm.path: index for index, bm in enumerate(bookmarks)}
+        if recently_used:
+            # Move paths from recent_paths to firs in the list of bookmarks
+            for path in reversed(recently_used.paths):
+                bm = bookmarks.pop(indexes[path])
+                bookmarks.insert(0, bm)
+        for bm in bookmarks:
             yield str(bm)
-            # print(colored(bm.path, "green"), f"({bm.description})")
 
 
 @functools.total_ordering

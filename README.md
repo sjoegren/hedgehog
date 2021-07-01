@@ -34,7 +34,7 @@ optional arguments:
 ### fzfdirs
 ```
 usage: fzfdirs [-h] [-V] [--color | --no-color] [-v] [--debug] [--file FILE]
-               [-e] [--bookmark DIR]
+               [-e] [--add-recent PATH] [--bookmark DIR]
 
 fzfdirs - print bookmarked directories to feed to fzf.
 
@@ -50,6 +50,7 @@ optional arguments:
   --file FILE          Bookmarks file (default:
                        /home/aksel/.config/hedgehog/bookmarks.yaml)
   -e, --edit           Edit bookmarks file
+  --add-recent PATH    Add PATH to recently used file
   --bookmark DIR       Add bookmark
 
 ```

@@ -54,6 +54,7 @@ cdg() {
     fi
     dir=$(INSTALL_DIR/bin/fzfdirs | fzf-tmux -- --reverse | sed -e 's/\s*(.*//')
     cd "$dir" || return
+	INSTALL_DIR/bin/fzfdirs --add-recent $(pwd)
 }
 
 export -f cdg ds

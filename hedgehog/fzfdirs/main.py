@@ -7,6 +7,7 @@ Shell function `cdg` opens fzf with the list of bookmarks and cd to the selected
 import argparse
 import logging
 import os
+import pathlib
 import sys
 
 import hedgehog
@@ -17,6 +18,7 @@ log = None
 EXIT_NOOP = 3
 EXIT_DELETED = 4
 BOOKMARK_FILE = hedgehog.CONFIG_DIR / "bookmarks.yaml"
+RECENTLY_USED_FILE = hedgehog.CACHE_DIR / "fzfdirs-recent.yaml"
 
 
 class DirsException(Error):
@@ -34,6 +36,11 @@ def _init(parser, argv: list, /):
         "--edit",
         action="store_true",
         help="Edit bookmarks file",
+    )
+    parser.add_argument(
+        "--add-recent",
+        metavar="PATH",
+        help="Add %(metavar)s to recently used file",
     )
     parser.add_argument(
         "--bookmark",
@@ -59,15 +66,22 @@ def main(*, cli_args: str = None):
 
     bm = bookmarks.Bookmarks(args.file)
     log.info("bookmarks: %s", bm)
+    recent = bookmarks.RecentlyUsed(RECENTLY_USED_FILE)
 
     if args.edit:
         editor = os.environ.get("EDITOR", "vim")
         os.execlp(editor, editor, args.file)
+    elif args.add_recent:
+        path = pathlib.Path(args.add_recent)
+        if not path.is_absolute():
+            path = pathlib.Path.home() / path
+        recent.add(path.as_posix())
+        return
 
     if not bm:
         raise DirsException("There are no bookmarks yet. --edit opens file in editor.")
 
-    for fmt in bm.formatted():
+    for fmt in bm.sorted_formatted(recent):
         print(fmt)
 
 
