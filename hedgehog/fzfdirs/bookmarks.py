@@ -74,12 +74,17 @@ class Bookmarks:
 
     def sorted_formatted(self, recently_used: Optional[RecentlyUsed] = None):
         bookmarks = sorted(self._bookmarks)
-        indexes = {bm.path: index for index, bm in enumerate(bookmarks)}
         if recently_used:
-            # Move paths from recent_paths to firs in the list of bookmarks
-            for path in reversed(recently_used.paths):
-                bm = bookmarks.pop(indexes[path])
-                bookmarks.insert(0, bm)
+            # Move bookmarks matching recent_paths to temp_bookmarks and
+            # replace it in the original list with None.
+            indexes = {bm.path: index for index, bm in enumerate(bookmarks)}
+            temp_bookmarks = []
+            for path in recently_used.paths:
+                temp_bookmarks.append(bookmarks[indexes[path]])
+                bookmarks[indexes[path]] = None
+            # Construct new list, with recently used bookmarks on top, then the
+            # original list minus the recent ones.
+            bookmarks = temp_bookmarks + [b for b in bookmarks if b]
         for bm in bookmarks:
             yield str(bm)
 
