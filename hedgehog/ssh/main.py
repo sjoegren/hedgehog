@@ -110,7 +110,7 @@ def main(*, cli_args: str = None):
     cprint = Print.instance()
     cache_file = hedgehog.CACHE_DIR / "sshansible_last_host"
     hostname = None
-    inventory = ansible.get_inventory(inventory=os.getenv("ANSIBLE_INVENTORY"))
+    inventory = ansible.get_inventory(path=os.getenv("ANSIBLE_INVENTORY"))
 
     config_file = pathlib.Path(args.config).resolve()
     config = yaml.safe_load(config_file.read_bytes())

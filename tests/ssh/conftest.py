@@ -22,5 +22,6 @@ def inventory(monkeypatch):
         )
     )
     mock_path.open.return_value = inventory
+    mock_path.name = "inventory.ini"
     monkeypatch.setattr(ansible, "ANSIBLE_INVENTORY", mock_path)
     return inventory

@@ -10,20 +10,26 @@ import warnings
 
 from typing import Dict, Iterable, List
 
+import yaml
+
 from .. import Error
 
-ANSIBLE_INVENTORY = pathlib.Path.home() / ".ansible-inventory"
+ANSIBLE_INVENTORY = pathlib.Path.home() / "inventory.yaml"
 
 Host = collections.namedtuple("Host", "name, address")
+log = logging.getLogger(__name__)
 
 
-def get_inventory(*, inventory=None) -> Dict[str, Host]:
-    """Get all hosts from inventory. If `inventory` is set to None, default
+def get_inventory(*, path=None) -> Dict[str, Host]:
+    """Get all hosts from inventory. If `path` is set to None, default
     will be used."""
     hosts = {}
-    inventory = pathlib.Path(inventory) if inventory else ANSIBLE_INVENTORY
+    path = pathlib.Path(path) if path else ANSIBLE_INVENTORY
+    log.debug("Read inventory: %s", path)
     try:
-        with inventory.open() as fp:
+        with path.open() as fp:
+            if path.name.endswith(("yaml", "yml")):
+                return _get_inventory_yaml(fp)
             for line in fp:
                 if (match := re.match(r"(^[\w.-]+)\s.*?\bansible_host=(\S+)", line)) :
                     if match[1] in hosts:
@@ -31,6 +37,18 @@ def get_inventory(*, inventory=None) -> Dict[str, Host]:
                     hosts[match[1]] = Host(*match.groups())
     except OSError as err:
         raise Error(f"Failed to read inventory: {err}") from err
+    return hosts
+
+
+def _get_inventory_yaml(file_):
+    hosts = {}
+    inventory = yaml.safe_load(file_)
+    for group in inventory["all"]["children"].values():
+        for name, hvars in group["hosts"].items():
+            try:
+                hosts[name] = Host(name, hvars["ansible_host"])
+            except KeyError:
+                log.debug("Host %s has no ansible_host key", name)
     return hosts
 
 
@@ -61,7 +79,6 @@ def write_ssh_config(ssh_config: pathlib.Path, inventory: Iterable[Host], /):
 
 def write_hosts_file(inventory: List[Host], hosts: pathlib.Path, domain: str = None):
     """Write host/address pairs to /etc/hosts from ansible inventory."""
-    log = logging.getLogger(__name__)
     delimiters = (
         "# --- hedgehog managed start ---",
         "# --- hedgehog managed end ---",
