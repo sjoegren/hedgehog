@@ -75,7 +75,10 @@ def main(*, cli_args: str = None):
         path = pathlib.Path(args.add_recent)
         if not path.is_absolute():
             path = pathlib.Path.home() / path
-        recent.add(path.as_posix())
+        if path in bm:
+            recent.add(path.as_posix())
+        else:
+            log.info("%s is not in bookmarks, skip adding to recent paths list", path)
         return
 
     if not bm:

@@ -1,3 +1,4 @@
+import collections.abc
 import functools
 import glob
 import logging
@@ -47,7 +48,7 @@ class RecentlyUsed:
         log.debug("Wrote paths to %s: %s", self._file, self.paths)
 
 
-class Bookmarks:
+class Bookmarks(collections.abc.Container):
     def __init__(self, path):
         self._file = pathlib.Path(path).resolve()
         self._bookmarks: list[Bookmark] = []
@@ -71,6 +72,11 @@ class Bookmarks:
 
     def __len__(self):
         return len(self._bookmarks)
+
+    def __contains__(self, item):
+        if isinstance(item, Bookmark):
+            return item in self._bookmarks
+        return Bookmark(item, None) in self._bookmarks
 
     def sorted_formatted(self, recently_used: Optional[RecentlyUsed] = None):
         bookmarks = sorted(self._bookmarks)
