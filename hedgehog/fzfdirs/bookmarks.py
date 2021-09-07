@@ -76,7 +76,7 @@ class Bookmarks(collections.abc.Container):
     def __contains__(self, item):
         if isinstance(item, Bookmark):
             return item in self._bookmarks
-        return Bookmark(item, None) in self._bookmarks
+        return Bookmark(str(item), None) in self._bookmarks
 
     def sorted_formatted(self, recently_used: Optional[RecentlyUsed] = None):
         bookmarks = sorted(self._bookmarks)
