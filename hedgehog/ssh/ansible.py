@@ -40,15 +40,22 @@ def get_inventory(*, path=None) -> Dict[str, Host]:
     return hosts
 
 
+def _generate_inventory_yaml_hosts(hostgroup):
+    for name, hvars in hostgroup.items():
+        try:
+            yield Host(name, hvars["ansible_host"])
+        except KeyError:
+            log.debug("Host %s has no ansible_host key", name)
+
+
 def _get_inventory_yaml(file_):
     hosts = {}
     inventory = yaml.safe_load(file_)
+    for h in _generate_inventory_yaml_hosts(inventory["all"]["hosts"]):
+        hosts[h.name] = h
     for group in inventory["all"]["children"].values():
-        for name, hvars in group["hosts"].items():
-            try:
-                hosts[name] = Host(name, hvars["ansible_host"])
-            except KeyError:
-                log.debug("Host %s has no ansible_host key", name)
+        for h in _generate_inventory_yaml_hosts(group["hosts"]):
+            hosts[h.name] = h
     return hosts
 
 
