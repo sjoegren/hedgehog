@@ -12,6 +12,41 @@ def test_get_inventory():
     assert hosts["remote.example.com"].address == "198.51.100.1"
 
 
+def test_find_inventory__found_yaml(tmp_path, monkeypatch):
+    conf = tmp_path / "foo.yaml"
+    conf.write_text(
+        textwrap.dedent(
+            """\
+            ---
+            all:
+            """
+        )
+    )
+    monkeypatch.setattr("os.getcwd", MagicMock(return_value=str(tmp_path)))
+    assert ansible.find_inventory() == conf.as_posix()
+
+
+def test_find_inventory__unknown_yaml_in_cwd(tmp_path, monkeypatch):
+    conf = tmp_path / "foo.yaml"
+    conf.write_text(
+        textwrap.dedent(
+            """\
+            ---
+            foo:
+            """
+        )
+    )
+    monkeypatch.setattr("os.getcwd", MagicMock(return_value=str(tmp_path)))
+    assert ansible.find_inventory() is None
+
+
+def test_find_inventory__malformed_yaml(tmp_path, monkeypatch):
+    conf = tmp_path / "foo.yaml"
+    conf.write_text("this is not yaml")
+    monkeypatch.setattr("os.getcwd", MagicMock(return_value=str(tmp_path)))
+    assert ansible.find_inventory() is None
+
+
 def test_write_ssh_config(tmp_path):
     inventory = [
         ansible.Host("foxtrot", "198.51.100.101"),

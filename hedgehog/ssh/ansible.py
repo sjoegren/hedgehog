@@ -1,4 +1,5 @@
 import collections
+import itertools
 import logging
 import os
 import pathlib
@@ -8,7 +9,7 @@ import tempfile
 import textwrap
 import warnings
 
-from typing import Dict, Iterable, List
+from typing import Dict, Iterable, List, Optional
 
 import yaml
 
@@ -38,6 +39,24 @@ def get_inventory(*, path=None) -> Dict[str, Host]:
     except OSError as err:
         raise Error(f"Failed to read inventory: {err}") from err
     return hosts
+
+
+def find_inventory() -> Optional[str]:
+    """Look for an Ansible inventory YAML file in CWD and return path to it."""
+    path = pathlib.Path(os.getcwd())
+    for p in itertools.chain(path.glob("*.yaml"), path.glob("*.yml")):
+        log.debug("Looking at %s ...", p)
+        try:
+            with p.open() as fp:
+                data = yaml.safe_load(fp)
+            inv = data["all"]
+        except Exception:
+            log.debug("Couldn't read yaml file %s", p, exc_info=True)
+            continue
+        else:
+            log.debug("Looks like an inventory: %r", inv)
+            return p.as_posix()
+    return None
 
 
 def _generate_inventory_yaml_hosts(hostgroup):

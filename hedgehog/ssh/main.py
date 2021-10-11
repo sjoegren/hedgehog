@@ -74,6 +74,14 @@ def _init(parser, argv: list, /):
         "-L", "--list", action="store_true", help="List hosts in inventory"
     )
     parser.add_argument(
+        "-i",
+        "--inventory",
+        default=os.getenv("ANSIBLE_INVENTORY"),
+        help="Ansible inventory file (yaml or ini). When not specified, use environment"
+        " variable ANSIBLE_INVENTORY if set, else look for yaml inventory in CWD.",
+    )
+
+    parser.add_argument(
         "--ssh-config",
         action="store_true",
         help="Re-write host aliases to ssh_config from ansible "
@@ -110,7 +118,7 @@ def main(*, cli_args: str = None):
     cprint = Print.instance()
     cache_file = hedgehog.CACHE_DIR / "sshansible_last_host"
     hostname = None
-    inventory = ansible.get_inventory(path=os.getenv("ANSIBLE_INVENTORY"))
+    inventory = ansible.get_inventory(path=args.inventory or ansible.find_inventory())
 
     config_file = pathlib.Path(args.config).resolve()
     config = yaml.safe_load(config_file.read_bytes())
