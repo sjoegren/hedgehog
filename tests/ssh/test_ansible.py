@@ -2,7 +2,16 @@ import textwrap
 
 from unittest.mock import MagicMock
 
+import pytest
+
+import hedgehog
 from hedgehog.ssh import ansible
+
+
+@pytest.fixture
+def enable_find_inventory(monkeypatch):
+    """Because we want inventory files to be found."""
+    monkeypatch.setattr(hedgehog, "_CALLED_FROM_TEST", False)
 
 
 def test_get_inventory():
@@ -12,7 +21,7 @@ def test_get_inventory():
     assert hosts["remote.example.com"].address == "198.51.100.1"
 
 
-def test_find_inventory__found_yaml(tmp_path, monkeypatch):
+def test_find_inventory__found_yaml(tmp_path, monkeypatch, enable_find_inventory):
     conf1 = tmp_path / "foo.yaml"
     conf2 = tmp_path / "barabra.yml"
     for conf in (conf1, conf2):
@@ -28,7 +37,9 @@ def test_find_inventory__found_yaml(tmp_path, monkeypatch):
     assert ansible.find_inventory() == conf2.as_posix()
 
 
-def test_find_inventory__unknown_yaml_in_cwd(tmp_path, monkeypatch):
+def test_find_inventory__unknown_yaml_in_cwd(
+    tmp_path, monkeypatch, enable_find_inventory
+):
     conf = tmp_path / "foo.yaml"
     conf.write_text(
         textwrap.dedent(
@@ -42,7 +53,7 @@ def test_find_inventory__unknown_yaml_in_cwd(tmp_path, monkeypatch):
     assert ansible.find_inventory() is None
 
 
-def test_find_inventory__malformed_yaml(tmp_path, monkeypatch):
+def test_find_inventory__malformed_yaml(tmp_path, monkeypatch, enable_find_inventory):
     conf = tmp_path / "foo.yaml"
     conf.write_text("this is not yaml")
     monkeypatch.setattr("os.getcwd", MagicMock(return_value=str(tmp_path)))

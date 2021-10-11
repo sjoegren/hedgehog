@@ -168,7 +168,8 @@ optional arguments:
 ```
 usage: sshansible [-h] [-V] [--color | --no-color] [-v] [--debug]
                   [--config CONFIG] [--scp [hostname]] [-c FILE] [--copy-id]
-                  [-l] [-L] [-i INVENTORY] [--ssh-config] [--hosts-file]
+                  [-l] [-L] [-i INVENTORY] [--no-local-inventory]
+                  [--ssh-config] [--hosts-file]
                   [arg ...]
 
 SSH to hostnames in an ansible-inventory using "ansible_host" address instead
@@ -211,6 +212,7 @@ optional arguments:
                         Ansible inventory file (yaml or ini). When not
                         specified, use environment variable ANSIBLE_INVENTORY
                         if set, else look for yaml inventory in CWD.
+  --no-local-inventory
   --ssh-config          Re-write host aliases to ssh_config from ansible
                         inventory. Normally this is done automatically on each
                         invocation.

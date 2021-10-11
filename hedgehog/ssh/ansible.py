@@ -13,7 +13,7 @@ from typing import Dict, Iterable, List, Optional
 
 import yaml
 
-from .. import Error
+import hedgehog
 
 ANSIBLE_INVENTORY = pathlib.Path.home() / "inventory.yaml"
 
@@ -25,8 +25,12 @@ def get_inventory(*, path=None) -> Dict[str, Host]:
     """Get all hosts from inventory. If `path` is set to None, default
     will be used."""
     hosts = {}
-    path = pathlib.Path(path) if path else ANSIBLE_INVENTORY
-    log.debug("Read inventory: %s", path)
+    if path:
+        path = pathlib.Path(path)
+        log.info("Using inventory: %s", path)
+    else:
+        path = ANSIBLE_INVENTORY
+        log.debug("Using default inventory: %s", path)
     try:
         with path.open() as fp:
             if path.name.endswith(("yaml", "yml")):
@@ -37,7 +41,7 @@ def get_inventory(*, path=None) -> Dict[str, Host]:
                         warnings.warn(f"Duplicate host {match[1]} in inventory")
                     hosts[match[1]] = Host(*match.groups())
     except OSError as err:
-        raise Error(f"Failed to read inventory: {err}") from err
+        raise hedgehog.Error(f"Failed to read inventory: {err}") from err
     return hosts
 
 
@@ -46,8 +50,8 @@ def find_inventory() -> Optional[str]:
     first file found that looks like an inventory."""
     path = pathlib.Path(os.getcwd())
     yaml_files = sorted(itertools.chain(path.glob("*.yaml"), path.glob("*.yml")))
+    log.debug("Looking at possible inventory files: %s", yaml_files)
     for p in yaml_files:
-        log.debug("Looking at %s ...", p)
         try:
             with p.open() as fp:
                 data = yaml.safe_load(fp)
@@ -57,7 +61,8 @@ def find_inventory() -> Optional[str]:
             continue
         else:
             log.debug("Looks like an inventory: %r", inv)
-            return p.as_posix()
+            if not hedgehog._CALLED_FROM_TEST:
+                return p.as_posix()
     return None
 
 

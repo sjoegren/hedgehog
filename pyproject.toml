@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hedgehog"
-version = "0.4.7"
+version = "0.4.8"
 description = "Random and somewhat useful tools"
 authors = ["Aksel Sjögren <akselsjogren@users.noreply.github.com>"]
 readme = "README.md"

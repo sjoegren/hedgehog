@@ -80,7 +80,11 @@ def _init(parser, argv: list, /):
         help="Ansible inventory file (yaml or ini). When not specified, use environment"
         " variable ANSIBLE_INVENTORY if set, else look for yaml inventory in CWD.",
     )
-
+    parser.add_argument(
+        "--no-local-inventory",
+        action="store_false",
+        dest="local_inventory",
+    )
     parser.add_argument(
         "--ssh-config",
         action="store_true",
@@ -118,7 +122,9 @@ def main(*, cli_args: str = None):
     cprint = Print.instance()
     cache_file = hedgehog.CACHE_DIR / "sshansible_last_host"
     hostname = None
-    inventory = ansible.get_inventory(path=args.inventory or ansible.find_inventory())
+    inventory = ansible.get_inventory(
+        path=args.inventory or args.local_inventory and ansible.find_inventory()
+    )
 
     config_file = pathlib.Path(args.config).resolve()
     config = yaml.safe_load(config_file.read_bytes())

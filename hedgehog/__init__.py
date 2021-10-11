@@ -16,6 +16,7 @@ CACHE_DIR = pathlib.Path.home() / ".cache/hedgehog"
 CONFIG_DIR = pathlib.Path.home() / ".config/hedgehog"
 TEMP_DIR = pathlib.Path(os.environ.get("XDG_RUNTIME_DIR", "/tmp")) / "hedgehog"
 META_FILE = importlib.resources.files(__package__) / "meta.json"
+_CALLED_FROM_TEST = False
 
 
 class Error(Exception):
