@@ -42,9 +42,11 @@ def get_inventory(*, path=None) -> Dict[str, Host]:
 
 
 def find_inventory() -> Optional[str]:
-    """Look for an Ansible inventory YAML file in CWD and return path to it."""
+    """Look for an Ansible inventory YAML file in CWD and return path to the
+    first file found that looks like an inventory."""
     path = pathlib.Path(os.getcwd())
-    for p in itertools.chain(path.glob("*.yaml"), path.glob("*.yml")):
+    yaml_files = sorted(itertools.chain(path.glob("*.yaml"), path.glob("*.yml")))
+    for p in yaml_files:
         log.debug("Looking at %s ...", p)
         try:
             with p.open() as fp:

@@ -13,17 +13,19 @@ def test_get_inventory():
 
 
 def test_find_inventory__found_yaml(tmp_path, monkeypatch):
-    conf = tmp_path / "foo.yaml"
-    conf.write_text(
-        textwrap.dedent(
-            """\
-            ---
-            all:
-            """
+    conf1 = tmp_path / "foo.yaml"
+    conf2 = tmp_path / "barabra.yml"
+    for conf in (conf1, conf2):
+        conf.write_text(
+            textwrap.dedent(
+                """\
+                ---
+                all:
+                """
+            )
         )
-    )
     monkeypatch.setattr("os.getcwd", MagicMock(return_value=str(tmp_path)))
-    assert ansible.find_inventory() == conf.as_posix()
+    assert ansible.find_inventory() == conf2.as_posix()
 
 
 def test_find_inventory__unknown_yaml_in_cwd(tmp_path, monkeypatch):
