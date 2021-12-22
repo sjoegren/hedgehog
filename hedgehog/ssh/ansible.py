@@ -36,7 +36,7 @@ def get_inventory(*, path=None) -> Dict[str, Host]:
             if path.name.endswith(("yaml", "yml")):
                 return _get_inventory_yaml(fp)
             for line in fp:
-                if (match := re.match(r"(^[\w.-]+)\s.*?\bansible_host=(\S+)", line)) :
+                if match := re.match(r"(^[\w.-]+)\s.*?\bansible_host=(\S+)", line):
                     if match[1] in hosts:
                         warnings.warn(f"Duplicate host {match[1]} in inventory")
                     hosts[match[1]] = Host(*match.groups())

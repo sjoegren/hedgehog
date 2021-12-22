@@ -34,7 +34,7 @@ def main(*, cli_args: str = None):
         return
 
     for desc, name in branch.all:
-        if (match := re.match(rf"..remotes/(\S*{branch.branch})\s", desc)) :
+        if match := re.match(rf"..remotes/(\S*{branch.branch})\s", desc):
             log.debug("There seems to be a matching remote: %s", match[1])
             remote_branch = match[1].split("/", maxsplit=1)
             break

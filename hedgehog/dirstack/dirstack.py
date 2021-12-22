@@ -56,7 +56,7 @@ class Dirstack:
         if not path.is_dir():
             self.log.warning("%s doesn't exist, skip adding it", path)
             return
-        if (entry := self._stack.get(path)) :
+        if entry := self._stack.get(path):
             self.log.debug("Overwriting entry: %s", entry)
         self._stack[path] = Entry(datetime.datetime.now(), path)
 

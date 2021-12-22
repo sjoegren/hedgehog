@@ -42,7 +42,7 @@ def select_branch(
     branches = []
     checked_out_branch = None
     for i, line in enumerate(lines):
-        if (match := re.match(r"(.).(?:remotes/)?(\S+)", line)) :
+        if match := re.match(r"(.).(?:remotes/)?(\S+)", line):
             branches.append((line, match[2]))
             if match[1] == "*":
                 checked_out_branch = i
