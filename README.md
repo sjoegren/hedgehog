@@ -19,7 +19,7 @@ usage: dirstack [-h] [-V] [--color | --no-color] [-v] [--debug] [--add DIR]
 dirstack - keep a list of recently visited directories to choose from, invoke
 with `ds` shell function.
 
-optional arguments:
+options:
   -h, --help           show this help message and exit
   -V, --version        show program's version number and exit
   --color, --no-color
@@ -41,7 +41,7 @@ fzfdirs - print bookmarked directories to feed to fzf.
 Shell function `cdg` opens fzf with the list of bookmarks and cd to the selected path.
 `cdg -e` to open bookmarks file in $EDITOR.
 
-optional arguments:
+options:
   -h, --help           show this help message and exit
   -V, --version        show program's version number and exit
   --color, --no-color
@@ -60,7 +60,7 @@ usage: git-cob [-h] [-V] [--color | --no-color] [-v] [--debug] [-a] [-P]
 
 git cob - display a menu with branches to choose from to checkout.
 
-optional arguments:
+options:
   -h, --help           show this help message and exit
   -V, --version        show program's version number and exit
   --color, --no-color
@@ -76,7 +76,7 @@ usage: git-fixup [opts] [git-commit args]
 
 Display a menu with commits to choose from to create a fixup commit.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -V, --version         show program's version number and exit
   --color, --no-color
@@ -93,7 +93,7 @@ usage: git-getbranch [-h] [-V] [--color | --no-color] [-v] [--debug] [-a] [-P]
 
 git getbranch - select a branch from a menu and print it.
 
-optional arguments:
+options:
   -h, --help           show this help message and exit
   -V, --version        show program's version number and exit
   --color, --no-color
@@ -103,13 +103,27 @@ optional arguments:
   -P, --no-preview     Don't show preview window in menu with latest commits.
 
 ```
+### git-lstree
+```
+usage: git-lstree [-h] [-V] [--color | --no-color] [-v] [--debug]
+
+git lstree - Print a tree of files from ls-files
+
+options:
+  -h, --help           show this help message and exit
+  -V, --version        show program's version number and exit
+  --color, --no-color
+  -v, --verbose        Increase verbosity level.
+  --debug              Extra debug output.
+
+```
 ### git-pv
 ```
 usage: git-pv [opts] [<revision range>] [[--] <path>...]
 
 Preview commits and show or print selected commit.
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -V, --version         show program's version number and exit
   --color, --no-color
@@ -127,7 +141,7 @@ usage: git-rmb [-h] [-V] [--color | --no-color] [-v] [--debug]
 
 git rmb - select a branch to remove remote and locally.
 
-optional arguments:
+options:
   -h, --help           show this help message and exit
   -V, --version        show program's version number and exit
   --color, --no-color
@@ -151,7 +165,7 @@ positional arguments:
   fromfile
   tofile
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -V, --version         show program's version number and exit
   --color, --no-color
@@ -192,7 +206,7 @@ positional arguments:
   arg                   ssh arguments, like host from ansible inventory to
                         connect to
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -V, --version         show program's version number and exit
   --color, --no-color

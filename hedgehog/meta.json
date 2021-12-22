@@ -24,6 +24,10 @@
             "brief": "git rmb - select a branch to remove remote and locally.",
             "description": "git rmb - select a branch to remove remote and locally."
         },
+        "git-lstree": {
+            "brief": "git lstree - Print a tree of files from ls-files",
+            "description": "git lstree - Print a tree of files from ls-files"
+        },
         "hedgehog": {
             "brief": "Provide information about available tools.",
             "description": "Provide information about available tools."
@@ -42,7 +46,7 @@
         }
     },
     "name": "hedgehog",
-    "version": "0.4.8",
+    "version": "0.5.0",
     "description": "Random and somewhat useful tools",
     "repository": "https://github.com/akselsjogren/hedgehog"
 }

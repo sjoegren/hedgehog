@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hedgehog"
-version = "0.4.9"
+version = "0.5.0"
 description = "Random and somewhat useful tools"
 authors = ["Aksel Sjögren <akselsjogren@users.noreply.github.com>"]
 readme = "README.md"
@@ -27,7 +27,7 @@ git-pv = "hedgehog.git.commit:preview_wrap"
 git-cob = "hedgehog.git.branch:cob_wrap"
 git-getbranch = "hedgehog.git.branch:getbranch_wrap"
 git-rmb = "hedgehog.git.rmbranch:main_wrap"
-git-tree = "hedgehog.git.tree:main_wrap"
+git-lstree = "hedgehog.git.lstree:main_wrap"
 hedgehog = "hedgehog.help:main"
 hhdiff = "hedgehog.diff.__main__:main"
 sshansible = "hedgehog.ssh.main:main_wrap"
