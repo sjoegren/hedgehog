@@ -2,9 +2,9 @@
 name = "hedgehog"
 version = "0.5.0"
 description = "Random and somewhat useful tools"
-authors = ["Aksel Sjögren <akselsjogren@users.noreply.github.com>"]
+authors = ["Aksel Sjögren <22745764+sjoegren@users.noreply.github.com>"]
 readme = "README.md"
-repository = "https://github.com/akselsjogren/hedgehog"
+repository = "https://github.com/sjoegren/hedgehog"
 include = ["bash/*"]
 exclude = ["hedgehog/tool.py"]
 

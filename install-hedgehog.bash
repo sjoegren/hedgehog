@@ -7,7 +7,7 @@
 set -uo pipefail
 
 INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/hedgehog}"
-PACKAGE="${PACKAGE:-git+https://github.com/akselsjogren/hedgehog.git#egg=hedgehog}"
+PACKAGE="${PACKAGE:-git+https://github.com/sjoegren/hedgehog.git#egg=hedgehog}"
 MIN_VERSION_MAJOR=3
 MIN_VERSION_MINOR=9
 STATUS_PYTHON_OK=0
