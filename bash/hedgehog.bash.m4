@@ -52,7 +52,7 @@ cdg() {
         INSTALL_DIR/bin/fzfdirs "$@"
         return
     fi
-    dir=$(INSTALL_DIR/bin/fzfdirs | fzf-tmux -- --reverse | sed -e 's/\s*(.*//')
+    dir=$(INSTALL_DIR/bin/fzfdirs | fzf-tmux -- --reverse | cut -f 1)
     cd "$dir" || return
 	INSTALL_DIR/bin/fzfdirs --add-recent $(pwd)
 }

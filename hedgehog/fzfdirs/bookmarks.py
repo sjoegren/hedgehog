@@ -108,7 +108,7 @@ class Bookmark:
         return self.path > other.path
 
     def __str__(self):
-        ret = Print.instance().colored(self.path.replace(HOME, ""), "green")
+        ret = Print.instance().colored(self.path, "green")
         if self.description is None:
             return ret
         return ret + f"\t({self.description})"
